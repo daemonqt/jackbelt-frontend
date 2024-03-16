@@ -1,0 +1,10 @@
+.dash-container {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+}
+
+.photo {
+    width: 30%;
+}
