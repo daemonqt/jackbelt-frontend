@@ -416,7 +416,7 @@ function Order() {
                                         </tr>
                                         <tr>
                                             <td><strong>Processed By</strong></td>
-                                            <td><strong>ID: </strong>{defdata.user_id || 'N/A'}, <strong>Product: </strong>{userNames[userIds.indexOf(defdata.user_id)] || 'N/A'}</td>
+                                            <td><strong>ID: </strong>{defdata.user_id || 'N/A'}, <strong>Name: </strong>{userNames[userIds.indexOf(defdata.user_id)] || 'N/A'}</td>
                                         </tr>
                                         <tr>
                                             <td><strong>Ordered When</strong></td>
