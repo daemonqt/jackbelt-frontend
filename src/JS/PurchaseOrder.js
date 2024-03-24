@@ -267,12 +267,12 @@ function Purchase() {
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Supplier ID</th>
-                            <th>Product ID</th>
+                            <th>Supplier's Name</th>
+                            <th>Product's Name</th>
                             <th>Quantity</th>
                             <th>Received Money</th>
                             <th>Status</th>
-                            <th>User ID</th>
+                            <th>Processed by</th>
                             <th>Purchaseed When</th>
                             <th>Action</th>
                         </tr>
@@ -282,12 +282,12 @@ function Purchase() {
                             searchResults.map((row, key) => (
                                 <tr key={key}>
                                     <td>{row.purchaseorder_id || 'N/A'}</td>
-                                    <td>{row.supplier_id || 'N/A'}</td>
-                                    <td>{row.product_id || 'N/A'}</td>
+                                    <td>{supplierNames[supplierIds.indexOf(row.supplier_id)] || 'N/A'}</td>
+                                    <td>{productNames[productIds.indexOf(row.product_id)] || 'N/A'}</td>
                                     <td>{row.purchaseQuantity || 'N/A'}</td>
                                     <td>{row.receivedMoney}</td>
                                     <td>{row.purchaseStatus || 'N/A'}</td>
-                                    <td>{row.user_id || 'N/A'}</td>
+                                    <td>{userNames[userIds.indexOf(row.user_id)] || 'N/A'}</td>
                                     <td>{row.soldDatenTime || 'N/A'}</td>
                                     <td>
                                         <Button variant='btn btn-primary btn-sm me-2' onClick={() => readSpecificPurchase(row.purchaseorder_id)}>

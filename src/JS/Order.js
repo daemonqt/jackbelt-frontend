@@ -265,12 +265,12 @@ function Order() {
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Customer ID</th>
-                            <th>Product ID</th>
+                            <th>Customer's Name</th>
+                            <th>Product's Name</th>
                             <th>Quantity</th>
                             <th>Total</th>
                             <th>Status</th>
-                            <th>User ID</th>
+                            <th>Processed by</th>
                             <th>Ordered When</th>
                             <th>Action</th>
                         </tr>
@@ -280,12 +280,12 @@ function Order() {
                             searchResults.map((row, key) => (
                                 <tr key={key}>
                                     <td>{row.order_id || 'N/A'}</td>
-                                    <td>{row.customer_id || 'N/A'}</td>
-                                    <td>{row.product_id || 'N/A'}</td>
+                                    <td>{customerNames[customerIds.indexOf(row.customer_id)] || 'N/A'}</td>
+                                    <td>{productNames[productIds.indexOf(row.product_id)] || 'N/A'}</td>
                                     <td>{row.orderQuantity || 'N/A'}</td>
                                     <td>{row.priceInTotal || 'N/A'}</td>
                                     <td>{row.orderStatus || 'N/A'}</td>
-                                    <td>{row.user_id || 'N/A'}</td>
+                                    <td>{userNames[userIds.indexOf(row.user_id)] || 'N/A'}</td>
                                     <td>{row.orderDatenTime || 'N/A'}</td>
                                     <td>
                                         <Button variant='btn btn-primary btn-sm me-2' onClick={() => readSpecificOrder(row.order_id)}>
