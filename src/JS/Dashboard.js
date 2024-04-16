@@ -1,35 +1,99 @@
 import React, { useEffect, useState } from "react";
-// import { useNavigate } from 'react-router-dom';
-// import { jwtDecode } from 'jwt-decode';
-// import { Link } from 'react-router-dom';
-
-// import Navbar from 'react-bootstrap/Navbar';
-// import Nav from 'react-bootstrap/Nav';
-// import Button from 'react-bootstrap/Button';
-// import Container from 'react-bootstrap/Container';
+import axios from 'axios';
 import Image from 'react-bootstrap/Image';
-// import pic1 from '../Pics/logo.png';
 import Navigationbar from "./Navbar";
+import Card from 'react-bootstrap/Card';
 import "bootstrap/dist/css/bootstrap.css";
-import "../CSS/Dash.css"
-import pic from "../Pics/staph.jpg"
+import "../CSS/Dash.css";
+import icon1 from "../Pics/user.png";
+import icon2 from "../Pics/shopping-cart.png";
+import icon3 from "../Pics/users-alt.png";
+import icon4 from "../Pics/handshake.png";
+import icon5 from "../Pics/coins.png";
+import icon6 from "../Pics/money-check-edit.png";
+import BACKEND_URL from './backendURL';
+import { CardBody, CardImg, CardText, Col, Row } from "react-bootstrap";
 
 const Dashboard = () => {
+    const [totalUsers, setTotalUsers] = useState(0);
+    const dash = JSON.parse(localStorage.getItem('token'));
+    const token = dash.data.token;
+
+    useEffect(() => {
+        const fetchTotalUsers = async () => {
+            try {
+                const response = await axios.get(`${BACKEND_URL}/api/users/count`, {
+                    headers: {
+                        Authorization: token
+                    }
+                });
+                setTotalUsers(response.data.userCount);
+            } catch (error) {
+                console.error('Error fetching total number of users:', error);
+            }
+        };
+
+        fetchTotalUsers();
+    }, [token]);
+
     return (
         <>  
             <Navigationbar/>
-            <div className="container text-white"><br />
-                <div style={{ textAlign: 'center', alignSelf: 'center', justifyContent: "center", color: "red" }}>
-                    <h1 className="title">PAGE UNDER CONSTRUCTION!</h1>
+            <div className="container"><br />
+                <div style={{ textAlign: 'center', alignSelf: 'center', justifyContent: "center", color: "white" }}>
+                    <h2 className="title">DASHBOARD</h2>
                 </div>
-                <div className="dash-container mt-4">
-                    <Image className="photo" src={pic}/>
-                </div>
-                <div className="mt-4" style={{ textAlign: 'center', alignSelf: 'center', justifyContent: "center" }}>
-                    <h2 style={{color: "green"}}>Future Updates:</h2>
-                    <h5 style={{color: "blue"}}> &gt; Add Pagination feature</h5>
-                    <h5 style={{color: "blue"}}> &gt; Improving page design</h5>
-                    <h5 style={{color: "blue"}}> &gt; Dashboard charts/graphs for sales, etc.</h5>
+                <div className="mt-4">
+                    <Row>
+                        <Col>
+                            <Card bg="primary">
+                                <CardBody>
+                                    <CardImg className="photo" src={icon1}/>
+                                    <CardText>Users: <span>{totalUsers}</span></CardText>
+                                </CardBody>
+                            </Card>
+                        </Col>
+                        <Col>
+                            <Card bg="success">
+                                <CardBody>
+                                    <CardImg className="photo" src={icon2}/>
+                                    <CardText>Products: <span>{totalUsers}</span></CardText>
+                                </CardBody>
+                            </Card>
+                        </Col>
+                        <Col>
+                            <Card bg="danger">
+                                <CardBody>
+                                    <CardImg className="photo" src={icon3}/>
+                                    <CardText>Customers: <span>{totalUsers}</span></CardText>
+                                </CardBody>
+                            </Card>
+                        </Col>
+                        <Col>
+                            <Card bg="warning">
+                                <CardBody>
+                                    <CardImg className="photo" src={icon4}/>
+                                    <CardText>Suppliers: <span>{totalUsers}</span></CardText>
+                                </CardBody>
+                            </Card>
+                        </Col>
+                        <Col>
+                            <Card bg="info">
+                                <CardBody>
+                                    <CardImg className="photo" src={icon5}/>
+                                    <CardText>Orders: <span>{totalUsers}</span></CardText>
+                                </CardBody>
+                            </Card>
+                        </Col>
+                        <Col>
+                            <Card bg="light">
+                                <CardBody>
+                                    <CardImg className="photo" src={icon6}/>
+                                    <CardText>Purchase: <span>{totalUsers}</span></CardText>
+                                </CardBody>
+                            </Card>
+                        </Col>
+                    </Row>
                 </div>
             </div>
         </>
