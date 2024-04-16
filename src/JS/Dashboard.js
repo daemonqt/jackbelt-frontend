@@ -21,13 +21,16 @@ const Dashboard = () => {
     const [totalUsers, setTotalUsers] = useState(0);
 
     useEffect(() => {
-        axios.get(`${BACKEND_URL}/api/users`)
-            .then(response => {
+        const fetchTotalUsers = async () => {
+            try {
+                const response = await axios.get(`${BACKEND_URL}/api/users`);
                 setTotalUsers(response.data.count);
-            })
-            .catch(error => {
+            } catch (error) {
                 console.error('Error fetching total number of users:', error);
-            });
+            }
+        };
+
+        fetchTotalUsers();
     }, []);
 
     return (
