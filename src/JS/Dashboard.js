@@ -7,14 +7,29 @@ import React, { useEffect, useState } from "react";
 // import Nav from 'react-bootstrap/Nav';
 // import Button from 'react-bootstrap/Button';
 // import Container from 'react-bootstrap/Container';
+import axios from 'axios';
 import Image from 'react-bootstrap/Image';
+import Card from 'react-bootstrap/Card';
 // import pic1 from '../Pics/logo.png';
 import Navigationbar from "./Navbar";
 import "bootstrap/dist/css/bootstrap.css";
 import "../CSS/Dash.css"
 import pic from "../Pics/staph.jpg"
+import BACKEND_URL from './backendURL';
 
 const Dashboard = () => {
+    const [totalUsers, setTotalUsers] = useState(0);
+
+    useEffect(() => {
+        axios.get(`${BACKEND_URL}/api/users`)
+            .then(response => {
+                setTotalUsers(response.data.count);
+            })
+            .catch(error => {
+                console.error('Error fetching total number of users:', error);
+            });
+    }, []);
+
     return (
         <>  
             <Navigationbar/>
@@ -31,6 +46,14 @@ const Dashboard = () => {
                     <h5 style={{color: "blue"}}> &gt; Improving page design</h5>
                     <h5 style={{color: "blue"}}> &gt; Dashboard charts/graphs for sales, etc.</h5>
                 </div>
+            </div>
+            <div className="mt-4">
+                <Card>
+                    <Card.Body>
+                        <Card.Title>Users</Card.Title>
+                        <Card.Text>Total Users: {totalUsers}</Card.Text>
+                    </Card.Body>
+                </Card>
             </div>
         </>
     );
