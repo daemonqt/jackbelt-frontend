@@ -58,9 +58,9 @@ router.get('/users', authenticateToken, async (req, res) => {
             if (err) {
                 console.error('Error fetching items:', err);
                 res.status(500).json({ message: 'Internal Server Error' });
+            } else {
+                res.status(200).json(result);
             }
-            const userCount = result.length;
-            res.status(200).json({ users: result, count: userCount });
         });
 
     } catch (error) {
