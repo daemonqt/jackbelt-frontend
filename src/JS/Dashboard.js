@@ -16,6 +16,11 @@ import { CardBody, CardImg, CardText, Col, Row } from "react-bootstrap";
 
 const Dashboard = () => {
     const [totalUsers, setTotalUsers] = useState(0);
+    const [totalProducts, setTotalProducts] = useState(0);
+    const [totalCustomers, setTotalCustomers] = useState(0);
+    const [totalSuppliers, setTotalSuppliers] = useState(0);
+    const [totalOrders, setTotalOrders] = useState(0);
+    const [totalPurchases, setTotalPurchases] = useState(0);
     const dash = JSON.parse(localStorage.getItem('token'));
     const token = dash.data.token;
 
@@ -32,8 +37,74 @@ const Dashboard = () => {
                 console.error('Error fetching total number of users:', error);
             }
         };
+        const fetchTotalProducts = async () => {
+            try {
+                const response = await axios.get(`${BACKEND_URL}/api/products/count`, {
+                    headers: {
+                        Authorization: token
+                    }
+                });
+                setTotalProducts(response.data.productCount);
+            } catch (error) {
+                console.error('Error fetching total number of products:', error);
+            }
+        };
+        const fetchTotalCustomers = async () => {
+            try {
+                const response = await axios.get(`${BACKEND_URL}/api/customers/count`, {
+                    headers: {
+                        Authorization: token
+                    }
+                });
+                setTotalCustomers(response.data.customerCount);
+            } catch (error) {
+                console.error('Error fetching total number of customers:', error);
+            }
+        };
+        const fetchTotalSuppliers = async () => {
+            try {
+                const response = await axios.get(`${BACKEND_URL}/api/suppliers/count`, {
+                    headers: {
+                        Authorization: token
+                    }
+                });
+                setTotalSuppliers(response.data.supplierCount);
+            } catch (error) {
+                console.error('Error fetching total number of suppliers:', error);
+            }
+        };
+        const fetchTotalOrders = async () => {
+            try {
+                const response = await axios.get(`${BACKEND_URL}/api/orders/count`, {
+                    headers: {
+                        Authorization: token
+                    }
+                });
+                setTotalOrders(response.data.orderCount);
+            } catch (error) {
+                console.error('Error fetching total number of orders:', error);
+            }
+        };
+        const fetchTotalPurchases = async () => {
+            try {
+                const response = await axios.get(`${BACKEND_URL}/api/purchaseorders/count`, {
+                    headers: {
+                        Authorization: token
+                    }
+                });
+                setTotalPurchases(response.data.purchaseorderCount);
+            } catch (error) {
+                console.error('Error fetching total number of purchases:', error);
+            }
+        };
 
         fetchTotalUsers();
+        fetchTotalProducts();
+        fetchTotalCustomers();
+        fetchTotalSuppliers();
+        fetchTotalOrders();
+        fetchTotalPurchases();
+
     }, [token]);
 
     return (
@@ -57,7 +128,7 @@ const Dashboard = () => {
                             <Card bg="success">
                                 <CardBody>
                                     <CardImg className="photo" src={icon2}/>
-                                    <CardText>Products: <span>{totalUsers}</span></CardText>
+                                    <CardText>Products: <span>{totalProducts}</span></CardText>
                                 </CardBody>
                             </Card>
                         </Col>
@@ -65,7 +136,7 @@ const Dashboard = () => {
                             <Card bg="danger">
                                 <CardBody>
                                     <CardImg className="photo" src={icon3}/>
-                                    <CardText>Customers: <span>{totalUsers}</span></CardText>
+                                    <CardText>Customers: <span>{totalCustomers}</span></CardText>
                                 </CardBody>
                             </Card>
                         </Col>
@@ -73,7 +144,7 @@ const Dashboard = () => {
                             <Card bg="warning">
                                 <CardBody>
                                     <CardImg className="photo" src={icon4}/>
-                                    <CardText>Suppliers: <span>{totalUsers}</span></CardText>
+                                    <CardText>Suppliers: <span>{totalSuppliers}</span></CardText>
                                 </CardBody>
                             </Card>
                         </Col>
@@ -81,7 +152,7 @@ const Dashboard = () => {
                             <Card bg="info">
                                 <CardBody>
                                     <CardImg className="photo" src={icon5}/>
-                                    <CardText>Orders: <span>{totalUsers}</span></CardText>
+                                    <CardText>Orders: <span>{totalOrders}</span></CardText>
                                 </CardBody>
                             </Card>
                         </Col>
@@ -89,7 +160,7 @@ const Dashboard = () => {
                             <Card bg="light">
                                 <CardBody>
                                     <CardImg className="photo" src={icon6}/>
-                                    <CardText>Purchase: <span>{totalUsers}</span></CardText>
+                                    <CardText>Purchase: <span>{totalPurchases}</span></CardText>
                                 </CardBody>
                             </Card>
                         </Col>
