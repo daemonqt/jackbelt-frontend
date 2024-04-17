@@ -229,6 +229,7 @@ function Product() {
                             <th>Code</th>
                             <th>Quantity</th>
                             <th>Price</th>
+                            <th>Created/Updated When</th>
                             <th>Action</th>
                         </tr>
                     </thead>

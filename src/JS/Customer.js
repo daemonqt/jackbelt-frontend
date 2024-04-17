@@ -218,6 +218,7 @@ function Customer() {
                             <th>ID</th>
                             <th>Name</th>
                             <th>Username</th>
+                            <th>Created/Updated When</th>
                             <th>Action</th>
                         </tr>
                     </thead>
