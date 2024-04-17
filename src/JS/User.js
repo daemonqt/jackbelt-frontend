@@ -193,7 +193,8 @@ function User() {
         return users.filter((user) =>
             user.user_id.toString().includes(searchInput.toLowerCase()) ||
             user.name.toLowerCase().includes(searchInput.toLowerCase()) ||
-            user.username.toLowerCase().includes(searchInput.toLowerCase())
+            user.username.toLowerCase().includes(searchInput.toLowerCase()) ||
+            user.ucreation_date.toString().toLowerCase().includes(searchInput.toLowerCase())
         );
     };
 
@@ -232,6 +233,7 @@ function User() {
                                     <td>{row.user_id || 'N/A'}</td>
                                     <td>{row.name || 'N/A'}</td>
                                     <td>{row.username || 'N/A'}</td>
+                                    <td>{row.ucreation_date || 'N/A'}</td>
                                     <td>
                                         <Button variant='btn btn-primary btn-sm me-2' onClick={() => readSpecificUser(row.user_id)}>
                                             View
@@ -311,6 +313,10 @@ function User() {
                                         <tr>
                                             <td><strong>Username</strong></td>
                                             <td>{defdata.username || 'N/A'}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Created/Updated When</strong></td>
+                                            <td>{defdata.ucreation_date}</td>
                                         </tr>
                                     </React.Fragment>
                                 ))}

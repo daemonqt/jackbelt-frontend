@@ -197,7 +197,8 @@ function Product() {
             product.productName.toLowerCase().includes(searchInput.toLowerCase()) ||
             product.productCode.toLowerCase().includes(searchInput.toLowerCase()) ||
             product.productQuantity.toString().includes(searchInput.toLowerCase()) ||
-            product.productPrice.toString().includes(searchInput.toLowerCase())
+            product.productPrice.toString().includes(searchInput.toLowerCase()) ||
+            product.pcreation_date.toString().toLowerCase().includes(searchInput.toLowerCase())
         );
     };
 
@@ -240,6 +241,7 @@ function Product() {
                                     <td>{row.productCode || 'N/A'}</td>
                                     <td>{row.productQuantity || 'N/A'}</td>
                                     <td>{row.productPrice || 'N/A'}</td>
+                                    <td>{row.pcreation_date || 'N/A'}</td>
                                     <td>
                                         <Button variant='btn btn-primary btn-sm me-2' onClick={() => readSpecificProduct(row.product_id)}>
                                             View
@@ -335,6 +337,10 @@ function Product() {
                                         <tr>
                                             <td><strong>Price</strong></td>
                                             <td>{defdata.productPrice || 'N/A'}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Created/Updated When</strong></td>
+                                            <td>{defdata.pcreation_date}</td>
                                         </tr>
                                     </React.Fragment>
                                 ))}

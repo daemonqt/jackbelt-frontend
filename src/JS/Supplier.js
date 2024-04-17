@@ -188,7 +188,8 @@ function Supplier() {
         return suppliers.filter((supplier) =>
             supplier.supplier_id.toString().includes(searchInput.toLowerCase()) ||
             supplier.name.toLowerCase().includes(searchInput.toLowerCase()) ||
-            supplier.username.toLowerCase().includes(searchInput.toLowerCase())
+            supplier.username.toLowerCase().includes(searchInput.toLowerCase()) ||
+            supplier.screation_date.toString().toLowerCase().includes(searchInput.toLowerCase())
         );
     };
 
@@ -227,6 +228,7 @@ function Supplier() {
                                     <td>{row.supplier_id || 'N/A'}</td>
                                     <td>{row.name || 'N/A'}</td>
                                     <td>{row.username || 'N/A'}</td>
+                                    <td>{row.screation_date || 'N/A'}</td>
                                     <td>
                                         <Button variant='btn btn-primary btn-sm me-2' onClick={() => readSpecificSupplier(row.supplier_id)}>
                                             View
@@ -298,6 +300,10 @@ function Supplier() {
                                         <tr>
                                             <td><strong>username</strong></td>
                                             <td>{defdata.username || 'N/A'}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Created/Updated When</strong></td>
+                                            <td>{defdata.screation_date}</td>
                                         </tr>
                                     </React.Fragment>
                                 ))}

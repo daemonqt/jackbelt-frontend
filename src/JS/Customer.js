@@ -188,7 +188,8 @@ function Customer() {
         return customers.filter((customer) =>
             customer.customer_id.toString().includes(searchInput.toLowerCase()) ||
             customer.name.toLowerCase().includes(searchInput.toLowerCase()) ||
-            customer.username.toLowerCase().includes(searchInput.toLowerCase())
+            customer.username.toLowerCase().includes(searchInput.toLowerCase()) ||
+            customer.ccreation_date.toString().toLowerCase().includes(searchInput.toLowerCase())
         );
     };
 
@@ -227,6 +228,7 @@ function Customer() {
                                     <td>{row.customer_id || 'N/A'}</td>
                                     <td>{row.name || 'N/A'}</td>
                                     <td>{row.username || 'N/A'}</td>
+                                    <td>{row.ccreation_date || 'N/A'}</td>
                                     <td>
                                         <Button variant='btn btn-primary btn-sm me-2' onClick={() => readSpecificCustomer(row.customer_id)}>
                                             View
@@ -298,6 +300,10 @@ function Customer() {
                                         <tr>
                                             <td><strong>username</strong></td>
                                             <td>{defdata.username || 'N/A'}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Created/Updated When</strong></td>
+                                            <td>{defdata.ccreation_date}</td>
                                         </tr>
                                     </React.Fragment>
                                 ))}
