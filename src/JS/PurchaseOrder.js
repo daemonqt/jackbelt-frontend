@@ -497,7 +497,7 @@ function Purchase() {
                                 <Form.Group controlId="status">
                                     <Form.Label>Purchase Status:</Form.Label>
                                     <Form.Select aria-label="Default select example" value={purchaseStatus || updatePurchase.purchaseStatus} onChange={(event) => setPurchaseStatus(event.target.value)}>
-                                        <option style={{color: 'red'}} disabled>Select Status</option>
+                                        <option style={{color: 'red'}} disabled selected>Select Status</option>
                                         <option value="PAID">PAID</option>
                                         <option value="PENDING">PENDING</option>
                                     </Form.Select>
