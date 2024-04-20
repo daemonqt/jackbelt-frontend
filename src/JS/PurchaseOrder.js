@@ -268,7 +268,7 @@ function Purchase() {
                         <tr>
                             <th>ID</th>
                             <th>Supplier's Name</th>
-                            <th>Product's Name</th>
+                            <th>Product</th>
                             <th>Quantity</th>
                             <th>Received Money</th>
                             <th>Status</th>

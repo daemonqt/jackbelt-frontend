@@ -266,7 +266,7 @@ function Order() {
                         <tr>
                             <th>ID</th>
                             <th>Customer's Name</th>
-                            <th>Product's Name</th>
+                            <th>Product</th>
                             <th>Quantity</th>
                             <th>Total</th>
                             <th>Status</th>
