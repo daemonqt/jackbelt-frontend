@@ -317,7 +317,7 @@ function Order() {
                                 <Form.Group controlId="customerid">
                                     <Form.Label>Customer Name:</Form.Label>
                                     <Form.Select aria-label="Default select example" onChange={(event) => setCustomerId(event.target.value)}>
-                                        <option style={{color: 'red'}} disabled>Select customer name</option>
+                                        <option style={{color: 'red'}} disabled selected>Select customer name</option>
                                         {customerNames.map((customerName, index) => (
                                             <option key={index} value={customerIds[index]}>{customerName}</option>
                                         ))}
@@ -330,7 +330,7 @@ function Order() {
                                 <Form.Group controlId="productid">
                                     <Form.Label>Ordered Product:</Form.Label>
                                     <Form.Select aria-label="Default select example" onChange={(event) => setProductId(event.target.value)}>
-                                        <option style={{color: 'red'}} disabled>Select Product</option>
+                                        <option style={{color: 'red'}} disabled selected>Select Product</option>
                                         {productNames.map((productName, index) => (
                                             <option key={index} value={productIds[index]}>{productName}</option>
                                         ))}
@@ -351,7 +351,7 @@ function Order() {
                                 <Form.Group controlId="status">
                                     <Form.Label>Order Status:</Form.Label>
                                     <Form.Select aria-label="Default select example" onChange={(event) => setOrderStatus(event.target.value)}>
-                                        <option style={{color: 'red'}} disabled>Select Status</option>
+                                        <option style={{color: 'red'}} disabled selected>Select Status</option>
                                         <option value="PAID">PAID</option>
                                         <option value="PENDING">PENDING</option>
                                     </Form.Select>
@@ -363,7 +363,7 @@ function Order() {
                                 <Form.Group controlId="userid">
                                     <Form.Label>Processed by:</Form.Label>
                                     <Form.Select aria-label="Default select example" onChange={(event) => setUserId(event.target.value)}>
-                                        <option style={{color: 'red'}} disabled>Select User</option>
+                                        <option style={{color: 'red'}} disabled selected>Select User</option>
                                         {userNames.map((userName, index) => (
                                             <option key={index} value={userIds[index]}>{userName}</option>
                                         ))}

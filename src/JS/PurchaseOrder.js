@@ -273,7 +273,7 @@ function Purchase() {
                             <th>Received Money</th>
                             <th>Status</th>
                             <th>Processed by</th>
-                            <th>Purchaseed When</th>
+                            <th>Purchased When</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -319,7 +319,7 @@ function Purchase() {
                                 <Form.Group controlId="supplierid">
                                     <Form.Label>Supplier Name:</Form.Label>
                                     <Form.Select aria-label="Default select example" onChange={(event) => setSupplierId(event.target.value)}>
-                                        <option style={{color: 'red'}} disabled>Select supplier name</option>
+                                        <option style={{color: 'red'}} disabled selected>Select supplier name</option>
                                         {supplierNames.map((supplierName, index) => (
                                             <option key={index} value={supplierIds[index]}>{supplierName}</option>
                                         ))}
@@ -332,7 +332,7 @@ function Purchase() {
                                 <Form.Group controlId="productid">
                                     <Form.Label>Purchaseed Product:</Form.Label>
                                     <Form.Select aria-label="Default select example" onChange={(event) => setProductId(event.target.value)}>
-                                        <option style={{color: 'red'}} disabled>Select Product</option>
+                                        <option style={{color: 'red'}} disabled selected>Select Product</option>
                                         {productNames.map((productName, index) => (
                                             <option key={index} value={productIds[index]}>{productName}</option>
                                         ))}
@@ -361,7 +361,7 @@ function Purchase() {
                                 <Form.Group controlId="status">
                                     <Form.Label>Purchase Status:</Form.Label>
                                     <Form.Select aria-label="Default select example" onChange={(event) => setPurchaseStatus(event.target.value)}>
-                                        <option style={{color: 'red'}} disabled>Select Status</option>
+                                        <option style={{color: 'red'}} disabled selected>Select Status</option>
                                         <option value="PAID">PAID</option>
                                         <option value="PENDING">PENDING</option>
                                     </Form.Select>
@@ -373,7 +373,7 @@ function Purchase() {
                                 <Form.Group controlId="userid">
                                     <Form.Label>Processed by:</Form.Label>
                                     <Form.Select aria-label="Default select example" onChange={(event) => setUserId(event.target.value)}>
-                                        <option style={{color: 'red'}} disabled>Select User</option>
+                                        <option style={{color: 'red'}} disabled selected>Select User</option>
                                         {userNames.map((userName, index) => (
                                             <option key={index} value={userIds[index]}>{userName}</option>
                                         ))}
