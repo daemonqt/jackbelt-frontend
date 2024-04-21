@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from 'axios';
 import Image from 'react-bootstrap/Image';
 import Navigationbar from "./Navbar";
+import Chart from 'chart.js/auto';
+import { Bar, Pie } from 'react-chartjs-2';
 import Card from 'react-bootstrap/Card';
 import "bootstrap/dist/css/bootstrap.css";
 import "../CSS/Dash.css";
@@ -21,6 +23,9 @@ const Dashboard = () => {
     const [totalSuppliers, setTotalSuppliers] = useState(0);
     const [totalOrders, setTotalOrders] = useState(0);
     const [totalPurchases, setTotalPurchases] = useState(0);
+    const [totalSales, setTotalSales] = useState(0);
+    const [salesByProducts, setSalesByProducts] = useState([]);
+
     const dash = JSON.parse(localStorage.getItem('token'));
     const token = dash.data.token;
 
@@ -107,6 +112,45 @@ const Dashboard = () => {
 
     }, [token]);
 
+    useEffect(() => {
+        const fetchTotalSales = async () => {
+            try {
+                const response = await axios.get(`${BACKEND_URL}/api/sales`, {
+                    headers: {
+                        Authorization: token
+                    }
+                });
+                setTotalSales(response.data.totalSales);
+            } catch (error) {
+                console.error('Error fetching total sales:', error);
+            }
+        };
+        const fetchSalesByProducts = async () => {
+            try {
+                const response = await axios.get(`${BACKEND_URL}/api/sales-by-products`, {
+                    headers: {
+                        Authorization: token
+                    }
+                });
+                setSalesByProducts(response.data);
+            } catch (error) {
+                console.error('Error fetching sales by products:', error);
+            }
+        };
+
+        fetchTotalSales();
+        fetchSalesByProducts();
+    }, [token]);
+
+    const generateRandomColors = (numColors) => {
+        const colors = [];
+        for (let i = 0; i < numColors; i++) {
+            const randomColor = `rgba(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, 0.7)`;
+            colors.push(randomColor);
+        }
+        return colors;
+    };
+
     return (
         <>  
             <Navigationbar/>
@@ -161,6 +205,90 @@ const Dashboard = () => {
                                 <CardBody>
                                     <CardImg className="photo" src={icon6}/>
                                     <CardText>Purchase: <span>{totalPurchases}</span></CardText>
+                                </CardBody>
+                            </Card>
+                        </Col>
+                    </Row>
+                </div>
+                <div className="mt-4">
+                    <Row>
+                        <Col>
+                            <Card bg="dark">
+                                <CardBody>
+                                    <Bar
+                                        data={{
+                                            labels: ['Total Sales'],
+                                            datasets: [{
+                                                label: 'Total Sales',
+                                                data: [totalSales],
+                                                backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                                                borderColor: 'rgba(54, 162, 235, 1)',
+                                                borderWidth: 1
+                                            }]
+                                        }}
+                                        options={{
+                                            scales: {
+                                                y: {
+                                                    beginAtZero: true,
+                                                    grid: {
+                                                        color: 'rgba(255,255,255,0.3)' // White grid lines
+                                                    },
+                                                    ticks: {
+                                                        color: 'rgba(255,255,255,1)' // White tick marks
+                                                    }
+                                                },
+                                                x: {
+                                                    grid: {
+                                                        color: 'rgba(255,255,255,0.3)' // White grid lines
+                                                    },
+                                                    ticks: {
+                                                        color: 'rgba(255,255,255,1)' // White tick marks
+                                                    }
+                                                }
+                                            },
+                                            plugins: {
+                                                legend: {
+                                                    labels: {
+                                                        color: 'white' // White legend text color
+                                                    }
+                                                }
+                                            }
+                                        }}
+                                    />
+                                </CardBody>
+                            </Card>
+                        </Col>
+                        <Col>
+                            <Card bg="secondary">
+                                <CardBody>
+                                    <Pie
+                                        data={{
+                                            labels: salesByProducts.map(product => product.productName),
+                                            datasets: [{
+                                                data: salesByProducts.map(product => product.total_sales),
+                                                backgroundColor: generateRandomColors(salesByProducts.length) // Use random colors
+                                            }]
+                                        }}
+                                        options={{
+                                            plugins: {
+                                                legend: {
+                                                    display: true,
+                                                    position: 'bottom',
+                                                    labels: {
+                                                        color: 'white'
+                                                    }
+                                                },
+                                                title: {
+                                                    display: true,
+                                                    text: 'Sales by Product',
+                                                    font: {
+                                                        size: 18
+                                                    },
+                                                    color: 'white'
+                                                }
+                                            }
+                                        }}
+                                    />
                                 </CardBody>
                             </Card>
                         </Col>
