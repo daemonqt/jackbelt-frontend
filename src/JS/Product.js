@@ -1,19 +1,23 @@
 import React, { useEffect, useState } from "react";
 import axios from 'axios';
+import Container from 'react-bootstrap/Container';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
-import Table from 'react-bootstrap/Table';
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import InputGroup from 'react-bootstrap/InputGroup';
-import Navigationbar from "./Navbar";
 import Swal from 'sweetalert2';
 import "../CSS/Style.css";
 import BACKEND_URL from './backendURL';
+import Sidebar from "./Sidebar";
+import html2pdf from 'html2pdf.js/dist/html2pdf.min.js';
 
 function Product() {
     const [products, setProducts] = useState([]);
+    const [enableEditing, setEnableEditing] = useState(true);
+    const [generateReportEnabled, setGenerateReportEnabled] = useState(false);
+    const [inventoryFinalized, setInventoryFinalized] = useState(false);
     const product = JSON.parse(localStorage.getItem('token'));
     const token = product.data.token;
 
@@ -21,6 +25,18 @@ function Product() {
         accept: 'application/json',
         Authorization: token
     };
+
+    const handleFinalizeInventory = () => {
+        setInventoryFinalized(true);
+        setEnableEditing(false);
+        setGenerateReportEnabled(true);
+    };
+    
+    const handleEnableEditing = () => {
+        setInventoryFinalized(false);
+        setEnableEditing(true);
+        setGenerateReportEnabled(false);
+    };    
 
     //DISPLAY
     const fetchProducts = async () => {
@@ -183,6 +199,159 @@ function Product() {
         });
     };
 
+    const [showAlertModal, setShowAlertModal] = useState(false);
+    const handleCloseAlertModal = () => setShowAlertModal(false);
+    const handleShowAlertModal = () => setShowAlertModal(true);
+
+    const [alertThresholds, setAlertThresholds] = useState({
+        inStock: 1000,
+        lowStock: 100,
+        outOfStock: 0,
+        overstock: 1001
+    });
+
+    const handleThresholdChange = (event, key) => {
+        const { value } = event.target;
+        setAlertThresholds(prevState => ({
+            ...prevState,
+            [key]: parseInt(value, 10)
+        }));
+    };
+
+    const handleSaveInvAlert = () => {
+        // Validation checks
+        if (alertThresholds.inStock <= alertThresholds.lowStock) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Input',
+                text: 'In stock must be greater than low stock.',
+            });
+            return;
+        }
+
+        if (alertThresholds.lowStock >= alertThresholds.inStock || alertThresholds.lowStock <= alertThresholds.outOfStock) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Input',
+                text: 'Low stock must be less than in stock and greater than out of stock.',
+            });
+            return;
+        }
+
+        if (alertThresholds.overstock <= alertThresholds.inStock) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Input',
+                text: 'Overstock must be greater than in stock.',
+            });
+            return;
+        }
+
+        setAlertThresholds(alertThresholds);
+        handleCloseAlertModal();
+        Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: 'All thresholds are valid and saved successfully.',
+        });
+    };
+
+
+    const getStockStatus = (quantity) => {
+        if (quantity >= alertThresholds.overstock) return 'Overstock';
+        if (quantity <= alertThresholds.outOfStock) return 'Out of Stock';
+        if (quantity <= alertThresholds.lowStock) return 'Low Stock';
+        return 'In Stock';
+    };
+    const getBackgroundColor = (quantity) => {
+        if (quantity >= alertThresholds.overstock) return 'orange';
+        if (quantity <= alertThresholds.outOfStock) return 'red';
+        if (quantity <= alertThresholds.lowStock) return 'yellow';
+        return 'green';
+    };
+
+    const saveInventoryReportAsPDF = () => {
+        const element = document.querySelector('.inventory-report-table');
+        const currentDateTime = new Date().toLocaleString(); // Get the current date and time
+    
+        const header = `
+            <div style="text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 10px; margin-top: 10px;">
+                Inventory & Sales Report
+            </div>
+        `;
+    
+        const style = `
+            <style>
+                .inventory-report-table thead, tbody, tfoot, tr, td, th {
+                    border-color: #000;
+                    border-style: solid;
+                    border-width: 1px;
+                }
+                .inventory-report-table th {
+                    font-size: 15px;
+                    font-weight: bold;
+                    background-color: #969696;
+                    color: #000;
+                }
+                .inventory-report-table td {
+                    font-size: 15px;
+                    font-weight: normal;
+                    color: #000;
+                }
+            </style>
+        `;
+
+        const footer = `
+            <div style="text-align: center; font-size: 18px; font-weight: normal; font-style: italic; margin-bottom: 10px; margin-top: 10px;">
+                Inventory & Sales Report as of ${currentDateTime}
+            </div>
+        `;
+    
+        const htmlContent = header + style + element.outerHTML + footer;
+        html2pdf().from(htmlContent).save();
+    };
+
+    // Fetch inventory report data
+    const [showInventory, setShowInventory] = useState(false);
+    const [inventoryReport, setInventoryReport] = useState([]);
+    const handleInventoryClose = () => setShowInventory(false);
+
+    const fetchInventoryReport = async () => {
+        try {
+            const product = JSON.parse(localStorage.getItem('token'));
+            const token = product?.data?.token;
+
+            const response = await axios.get(`${BACKEND_URL}/api/inventory-report`, {
+                headers: {
+                    Authorization: token
+                }
+            });
+            setInventoryReport(response.data);
+            setShowInventory(true);
+        } catch (error) {
+            console.error('Error fetching inventory report:', error);
+            if (error.response && error.response.status === 422) {
+                setValidationError(error.response.data.errors);
+            } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Failed to fetch inventory report. Please try again later.',
+                    icon: 'error'
+                });
+            }
+        }
+    };
+
+    //handle "Generate Inventory Report"
+    const handleGenerateInventoryReport = () => {
+        fetchInventoryReport();
+    };
+
+    const getCurrentDateTime = () => {
+        const now = new Date();
+        return now.toLocaleString();
+    };
+
     //Search bar component
     const [searchInput, setSearchInput] = useState("");
     const [searchResults, setSearchResults] = useState([]);
@@ -207,64 +376,211 @@ function Product() {
     }, [products, searchInput]);
 
     return (
-        <>
-            <Navigationbar/>
-            {/* Product UI */}
-            <div className="container"><br />
-                <div style={{ textAlign: 'center', alignSelf: 'center', justifyContent: "center", color: "white" }}>
-                    <h2 className="title">PRODUCTS</h2>
-                </div>
-                <div className="top-components">
-                    <InputGroup size="sm" className="mb-2 searchbar">
-                        <InputGroup.Text>Search</InputGroup.Text>
-                        <Form.Control size="sm" type="search" placeholder="search table data" value={searchInput} onChange={handleSearchInputChange} className="me-2" aria-label="Search" />
-                    </InputGroup>
-                    <Button variant="btn btn-success btn-sm" onClick={handleShow}>+ Register Product</Button>
-                </div>
-                <Table className="mt-2 custom-table" striped bordered hover variant="dark" responsive>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Product</th>
-                            <th>Code</th>
-                            <th>Quantity</th>
-                            <th>Price</th>
-                            <th>Created/Updated When</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {searchResults.length > 0 &&
-                            searchResults.map((row, key) => (
-                                <tr key={key}>
-                                    <td>{row.product_id || 'N/A'}</td>
-                                    <td>{row.productName || 'N/A'}</td>
-                                    <td>{row.productCode || 'N/A'}</td>
-                                    <td>{row.productQuantity || 'N/A'}</td>
-                                    <td>{row.productPrice || 'N/A'}</td>
-                                    <td>{row.pcreation_date || 'N/A'}</td>
-                                    <td>
-                                        <Button variant='btn btn-primary btn-sm me-2' onClick={() => readSpecificProduct(row.product_id)}>
-                                            View
-                                        </Button>
-                                        <Button variant='btn btn-warning btn-sm me-2' onClick={() => handleShowUpdate(row)}>
-                                            Update
-                                        </Button>
-                                        <Button variant='btn btn-danger btn-sm me-2' onClick={() => deleteProduct(row.product_id)}>
-                                            Delete
-                                        </Button>
-                                    </td>
+        <Container fluid>
+            <Row>
+                <Col sm={2}>
+                    <Sidebar/>
+                </Col>
+                <Col>
+                    {/* Product UI */}
+                    <div className="container"><br />
+                        <div className="top-components">
+                            <div className="searchbar-container">
+                                <InputGroup size="sm" className="searchbar">
+                                    <InputGroup.Text>Search</InputGroup.Text>
+                                    <Form.Control size="sm" type="search" placeholder="search table data" value={searchInput} onChange={handleSearchInputChange} className="input-data" aria-label="Search" />
+                                </InputGroup>
+                            </div>
+                            <div className="button-container">
+                                <Button
+                                    variant="info"
+                                    onClick={handleShowAlertModal}
+                                    size="sm"
+                                    className="me-2">
+                                    Set Inventory Alert
+                                </Button>
+                                <Button
+                                    variant={!inventoryFinalized ? 'primary' : 'outline-primary'}
+                                    onClick={handleFinalizeInventory}
+                                    disabled={inventoryFinalized}
+                                    size="sm"
+                                    className="me-2">
+                                    Finalize Inventory
+                                </Button>
+                                <Button
+                                    variant={generateReportEnabled ? 'primary' : 'outline-primary'}
+                                    onClick={handleGenerateInventoryReport}
+                                    disabled={!generateReportEnabled}
+                                    size="sm"
+                                    className="me-2">
+                                    Inventory & Sales Report
+                                </Button>
+                                <Button
+                                    variant={inventoryFinalized ? 'success' : 'outline-success'}
+                                    onClick={handleEnableEditing}
+                                    disabled={!inventoryFinalized}
+                                    size="sm"
+                                    className="me-2">
+                                    Enable Editing
+                                </Button>
+                                <Button
+                                    variant={enableEditing ? 'success' : 'outline-success'}
+                                    onClick={handleShow}
+                                    disabled={!enableEditing}
+                                    size="sm">
+                                    + Add Product
+                                </Button>
+                            </div>
+                        </div>
+                        <div className="table-container">
+                            <table className="mt-2 text-center">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Product</th>
+                                        <th>Code</th>
+                                        <th>Quantity</th>
+                                        <th>Price</th>
+                                        <th>Created/Updated When</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {searchResults.length > 0 &&
+                                        searchResults.map((row, key) => (
+                                            <tr key={key}>
+                                                <td>{row.product_id || 'N/A'}</td>
+                                                <td>{row.productName || 'N/A'}</td>
+                                                <td>{row.productCode || 'N/A'}</td>
+                                                <td>{row.productQuantity || 'N/A'}</td>
+                                                <td>{row.productPrice || 'N/A'}</td>
+                                                <td>{row.pcreation_date || 'N/A'}</td>
+                                                <td>
+                                                    <Button variant='btn btn-primary btn-sm me-2' onClick={() => readSpecificProduct(row.product_id)}>
+                                                        View
+                                                    </Button>
+                                                    <Button
+                                                        variant={enableEditing ? 'warning' : 'outline-warning'}
+                                                        size="sm"
+                                                        onClick={() => handleShowUpdate(row)}
+                                                        disabled={!enableEditing}
+                                                        className="me-2">
+                                                        Update
+                                                    </Button>
+                                                    <Button
+                                                        variant={enableEditing ? 'danger' : 'outline-danger'}
+                                                        size="sm"
+                                                        onClick={() => deleteProduct(row.product_id)}
+                                                        disabled={!enableEditing}
+                                                        className="me-2">
+                                                        Delete
+                                                    </Button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </Col>
+            </Row>
+
+            {/* MODAL INVREPORT */}
+            <Modal className="glassmorphism text-white inventory-modal" show={showInventory} onHide={handleInventoryClose} data-bs-theme='dark' size="xl">
+                <Modal.Header className="modal-title">
+                    <Modal.Title>Inventory & Sales Report as of {getCurrentDateTime()}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <div className="container">
+                        <table className="inventory-report-table text-center">
+                            <thead>
+                                <tr>
+                                    <th>Product Name</th>
+                                    <th>Product Code</th>
+                                    <th>Price</th>
+                                    <th>Current Quantity</th>
+                                    <th>Total Sold</th>
+                                    <th>Total Quantity</th>
+                                    <th>Product Revenue</th>
+                                    <th>Status</th>
                                 </tr>
-                            ))
-                        }
-                    </tbody>
-                </Table>
-            </div>
+                            </thead>
+                            <tbody>
+                                {inventoryReport.map((item, index) => (
+                                    <tr key={index}>
+                                        <td>{item.productName}</td>
+                                        <td>{item.productCode}</td>
+                                        <td>{item.productPrice}</td>
+                                        <td>{item.productQuantity}</td>
+                                        <td>{item.orderQuantity}</td>
+                                        <td>{item.totalQuantity}</td>
+                                        <td>{item.productRevenue}</td>
+                                        <td style={{ backgroundColor: getBackgroundColor(item.productQuantity) }}>
+                                            {getStockStatus(item.productQuantity)}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="primary" onClick={saveInventoryReportAsPDF}>Save as PDF</Button>
+                    <Button variant="danger" onClick={handleInventoryClose}>Close</Button>
+                </Modal.Footer>
+            </Modal>
+
+            <Modal className="glassmorphism text-white" show={showAlertModal} onHide={handleCloseAlertModal} data-bs-theme='dark' centered>
+                <Modal.Header className="modal-title">
+                    <Modal.Title>Set Inventory Alert Thresholds</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group controlId="inStockThreshold">
+                            <Form.Label>In Stock Threshold:</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={alertThresholds.inStock}
+                                onChange={(event) => handleThresholdChange(event, 'inStock')}
+                            />
+                        </Form.Group>
+                        <Form.Group controlId="lowStockThreshold">
+                            <Form.Label>Low Stock Threshold:</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={alertThresholds.lowStock}
+                                onChange={(event) => handleThresholdChange(event, 'lowStock')}
+                            />
+                        </Form.Group>
+                        <Form.Group controlId="outOfStockThreshold">
+                            <Form.Label>Out of Stock Threshold:</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={alertThresholds.outOfStock}
+                                onChange={(event) => handleThresholdChange(event, 'outOfStock')}
+                            />
+                        </Form.Group>
+                        <Form.Group controlId="overstockThreshold">
+                            <Form.Label>Overstock Threshold:</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={alertThresholds.overstock}
+                                onChange={(event) => handleThresholdChange(event, 'overstock')}
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer className="justify-content-between">
+                    <Button variant="success" onClick={handleSaveInvAlert}>Save</Button>
+                    <Button variant="danger" onClick={handleCloseAlertModal}>Close</Button>
+                </Modal.Footer>
+            </Modal>
 
             {/* MODAL REGISTER */}
             <Modal className="glassmorphism text-white" show={show} onHide={handleClose} data-bs-theme='dark' centered>
                 <Modal.Header className="modal-title">
-                    <Modal.Title>Register Product</Modal.Title>
+                    <Modal.Title>Add Product</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
@@ -315,38 +631,38 @@ function Product() {
                 </Modal.Header>
                 <Modal.Body>
                     <div className="container"><br />
-                        <Table striped bordered hover>
+                        <table>
                             <tbody>
                                 {Array.isArray(specificProductData) && specificProductData.map((defdata, index) => (
                                     <React.Fragment key={index}>
                                         <tr>
-                                            <td><strong>Product ID</strong></td>
+                                            <th>Product ID</th>
                                             <td>{defdata.product_id || 'N/A'}</td>
                                         </tr>
                                         <tr>
-                                            <td><strong>Product</strong></td>
+                                            <th>Product</th>
                                             <td>{defdata.productName || 'N/A'}</td>
                                         </tr>
                                         <tr>
-                                            <td><strong>Code</strong></td>
+                                            <th>Code</th>
                                             <td>{defdata.productCode || 'N/A'}</td>
                                         </tr>
                                         <tr>
-                                            <td><strong>Quantity</strong></td>
+                                            <th>Quantity</th>
                                             <td>{defdata.productQuantity || 'N/A'}</td>
                                         </tr>
                                         <tr>
-                                            <td><strong>Price</strong></td>
+                                            <th>Price</th>
                                             <td>{defdata.productPrice || 'N/A'}</td>
                                         </tr>
                                         <tr>
-                                            <td><strong>Created/Updated When</strong></td>
+                                            <th>Created/Updated When</th>
                                             <td>{defdata.pcreation_date}</td>
                                         </tr>
                                     </React.Fragment>
                                 ))}
                             </tbody>
-                        </Table>
+                        </table>
                     </div>
                 </Modal.Body>
                 <Modal.Footer>
@@ -400,7 +716,7 @@ function Product() {
                     <Button variant="danger" onClick={handleCloseUpdate}>Close</Button>
                 </Modal.Footer>
             </Modal>
-        </>
+        </Container>
     );
 }
 

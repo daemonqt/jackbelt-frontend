@@ -1,16 +1,31 @@
 import React, { useEffect, useState } from "react";
 import axios from 'axios';
+import Container from 'react-bootstrap/Container';
 import Modal from 'react-bootstrap/Modal';
+import Image from 'react-bootstrap/Image';
+import Carousel from 'react-bootstrap/Carousel';
 import Button from 'react-bootstrap/Button';
-import Table from 'react-bootstrap/Table';
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import InputGroup from 'react-bootstrap/InputGroup';
-import Navigationbar from "./Navbar";
 import Swal from 'sweetalert2';
 import "../CSS/Style.css";
 import BACKEND_URL from './backendURL';
+import Sidebar from "./Sidebar.js";
+
+import picsizechart from "../Pics/rcppics/rcpchart.png";
+import rcp1 from "../Pics/rcppics/rcp1.png";
+import rcp2 from "../Pics/rcppics/rcp2.png";
+import rcp3 from "../Pics/rcppics/rcp3.png";
+import rcp4 from "../Pics/rcppics/rcp4.png";
+import rcp5 from "../Pics/rcppics/rcp5.png";
+import rcp6 from "../Pics/rcppics/rcp6.png";
+import rcp7 from "../Pics/rcppics/rcp7.png";
+import rcp8 from "../Pics/rcppics/rcp8.png";
+import rcp9 from "../Pics/rcppics/rcp9.png";
+import rcp10 from "../Pics/rcppics/rcp10.png";
+import rcp11 from "../Pics/rcppics/rcp11.png";
 
 function Order() {
     const [orders, setOrders] = useState([]);
@@ -62,6 +77,7 @@ function Order() {
         // Fetch orders data
         fetchOrders();
     }, []);
+
     
 
     //CREATE
@@ -114,6 +130,10 @@ function Order() {
             }
         });
     };
+    //Size chart
+    const [showSizeModal, setShowSizeModal] = useState(false);
+    const handleSizeModalClose = () => setShowSizeModal(false);
+    const handleShowSizeModal = () => setShowSizeModal(true);
 
     //DISPLAY SPECIFIC USER
     const [showOrder, setShowOrder] = useState(false);
@@ -228,18 +248,41 @@ function Order() {
     const handleSearchInputChange = (event) => {
         setSearchInput(event.target.value);
     };
+    
+    const customerIdToNameMap = customerIds.reduce((map, id, index) => {
+        map[id] = customerNames[index];
+        return map;
+    }, {});
+
+    const productIdToNameMap = productIds.reduce((map, id, index) => {
+        map[id] = productNames[index];
+        return map;
+    }, {});
+
+    const userIdToNameMap = userIds.reduce((map, id, index) => {
+        map[id] = userNames[index];
+        return map;
+    }, {});
 
     const filterOrders = () => {
-        return orders.filter((order) =>
-            order.order_id.toString().includes(searchInput.toLowerCase()) ||
-            order.customer_id.toString().includes(searchInput.toLowerCase()) ||
-            order.product_id.toString().includes(searchInput.toLowerCase()) ||
-            order.orderQuantity.toString().includes(searchInput.toLowerCase()) ||
-            order.priceInTotal.toString().includes(searchInput.toLowerCase()) ||
-            order.orderStatus.toLowerCase().includes(searchInput.toLowerCase()) ||
-            order.user_id.toString().includes(searchInput.toLowerCase()) ||
-            order.orderDatenTime.toString().toLowerCase().includes(searchInput.toLowerCase())
-        );
+        return orders.filter((order) => {
+            const customerName = customerIdToNameMap[order.customer_id] || '';
+            const productName = productIdToNameMap[order.product_id] || '';
+            const userName = userIdToNameMap[order.user_id] || '';
+            return (
+                order.order_id.toString().includes(searchInput.toLowerCase()) ||
+                order.customer_id.toString().includes(searchInput.toLowerCase()) ||
+                customerName.toLowerCase().includes(searchInput.toLowerCase()) ||
+                order.product_id.toString().includes(searchInput.toLowerCase()) ||
+                productName.toLowerCase().includes(searchInput.toLowerCase()) ||
+                order.orderQuantity.toString().includes(searchInput.toLowerCase()) ||
+                order.priceInTotal.toString().includes(searchInput.toLowerCase()) ||
+                order.orderStatus.toLowerCase().includes(searchInput.toLowerCase()) ||
+                order.user_id.toString().includes(searchInput.toLowerCase()) ||
+                userName.toLowerCase().includes(searchInput.toLowerCase()) ||
+                order.orderDatenTime.toString().toLowerCase().includes(searchInput.toLowerCase())
+            );
+        });
     };
 
     useEffect(() => {
@@ -247,68 +290,136 @@ function Order() {
     }, [orders, searchInput]);
 
     return (
-        <>
-            <Navigationbar/>
-            {/* USER UI */}
-            <div className="container"><br />
-                <div style={{ textAlign: 'center', alignSelf: 'center', justifyContent: "center", color: "white" }}>
-                    <h2 className="title">CUSTOMER ORDERS</h2>
-                </div>
-                <div className="top-components">
-                    <InputGroup size="sm" className="mb-2 searchbar">
-                        <InputGroup.Text>Search</InputGroup.Text>
-                        <Form.Control size="sm" type="search" placeholder="search table data" value={searchInput} onChange={handleSearchInputChange} className="me-2" aria-label="Search" />
-                    </InputGroup>
-                    <Button variant="btn btn-success btn-sm" onClick={handleShow}>+ Register Order</Button>
-                </div>
-                <Table className="mt-2 custom-table" striped bordered hover variant="dark" responsive>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Customer's Name</th>
-                            <th>Product</th>
-                            <th>Quantity</th>
-                            <th>Total</th>
-                            <th>Status</th>
-                            <th>Processed by</th>
-                            <th>Ordered When</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {searchResults.length > 0 &&
-                            searchResults.map((row, key) => (
-                                <tr key={key}>
-                                    <td>{row.order_id || 'N/A'}</td>
-                                    <td>{customerNames[customerIds.indexOf(row.customer_id)] || 'N/A'}</td>
-                                    <td>{productNames[productIds.indexOf(row.product_id)] || 'N/A'}</td>
-                                    <td>{row.orderQuantity || 'N/A'}</td>
-                                    <td>{row.priceInTotal || 'N/A'}</td>
-                                    <td>{row.orderStatus || 'N/A'}</td>
-                                    <td>{userNames[userIds.indexOf(row.user_id)] || 'N/A'}</td>
-                                    <td>{row.orderDatenTime || 'N/A'}</td>
-                                    <td>
-                                        <Button variant='btn btn-primary btn-sm me-2' onClick={() => readSpecificOrder(row.order_id)}>
-                                            View
-                                        </Button>
-                                        <Button variant='btn btn-warning btn-sm me-2' onClick={() => handleShowUpdate(row)}>
-                                            Update
-                                        </Button>
-                                        <Button variant='btn btn-danger btn-sm me-2' onClick={() => deleteOrder(row.order_id)}>
-                                            Delete
-                                        </Button>
-                                    </td>
-                                </tr>
-                            ))
-                        }
-                    </tbody>
-                </Table>
-            </div>
+        <Container fluid>
+            <Row>
+                <Col sm={2}>
+                    <Sidebar/>
+                </Col>
+                <Col>
+                    {/* USER UI */}
+                    <div className="container"><br />
+                        <div className="top-components">
+                            <div className="searchbar-container">
+                                <InputGroup size="sm" className="searchbar">
+                                    <InputGroup.Text>Search</InputGroup.Text>
+                                    <Form.Control size="sm" type="search" placeholder="search table data" value={searchInput} onChange={handleSearchInputChange} className="input-data" aria-label="Search" />
+                                </InputGroup>
+                            </div>
+                            <div className="button-container">
+                                <Button variant="btn btn-primary btn-sm" className="me-2" onClick={handleShowSizeModal}>Size Comparison</Button>
+                                <Button variant="btn btn-success btn-sm" onClick={handleShow}>+ Add Order</Button>
+                            </div>
+                        </div>
+                        <div className="table-container">
+                            <table className="mt-2 text-center">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Customer's Name</th>
+                                        <th>Product</th>
+                                        <th>Quantity</th>
+                                        <th>Total</th>
+                                        <th>Status</th>
+                                        <th>Processed by</th>
+                                        <th>Ordered When</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {searchResults.length > 0 &&
+                                        searchResults.map((row, key) => (
+                                            <tr key={key}>
+                                                <td>{row.order_id || 'N/A'}</td>
+                                                <td>{customerNames[customerIds.indexOf(row.customer_id)] || 'N/A'}</td>
+                                                <td>{productNames[productIds.indexOf(row.product_id)] || 'N/A'}</td>
+                                                <td>{row.orderQuantity || 'N/A'}</td>
+                                                <td>{row.priceInTotal || 'N/A'}</td>
+                                                <td>{row.orderStatus || 'N/A'}</td>
+                                                <td>{userNames[userIds.indexOf(row.user_id)] || 'N/A'}</td>
+                                                <td>{row.orderDatenTime || 'N/A'}</td>
+                                                <td>
+                                                    <Button variant='btn btn-primary btn-sm me-2' onClick={() => readSpecificOrder(row.order_id)}>
+                                                        View
+                                                    </Button>
+                                                    <Button variant='btn btn-warning btn-sm me-2' onClick={() => handleShowUpdate(row)}>
+                                                        Update
+                                                    </Button>
+                                                    <Button variant='btn btn-danger btn-sm me-2' onClick={() => deleteOrder(row.order_id)}>
+                                                        Delete
+                                                    </Button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </Col>
+            </Row>
+            
+            {/* VIEW SIZES */}
+            <Modal className="glassmorphism text-white" show={showSizeModal} onHide={handleSizeModalClose} data-bs-theme='dark' size="xl">
+                <Modal.Header className="modal-title">
+                    <Modal.Title>Size Comparison Chart</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <div className="container" style={{justifyContent: 'center', alignContent: 'center'}}>
+                        <Row>
+                            <Col>
+                                <Image src={picsizechart} alt="sizechart" style={{width: 700}} rounded fluid/>
+                            </Col>
+                        </Row>
+                        <Row className="mt-3">
+                            <Col>
+                                <Carousel>
+                                    <Carousel.Item>
+                                        <Image src={rcp1} style={{width: 700}} rounded fluid/>
+                                    </Carousel.Item>
+                                    <Carousel.Item>
+                                        <Image src={rcp2} style={{width: 700}} rounded fluid/>
+                                    </Carousel.Item>
+                                    <Carousel.Item>
+                                        <Image src={rcp3} style={{width: 700}} rounded fluid/>
+                                    </Carousel.Item>
+                                    <Carousel.Item>
+                                        <Image src={rcp4} style={{width: 700}} rounded fluid/>
+                                    </Carousel.Item>
+                                    <Carousel.Item>
+                                        <Image src={rcp5} style={{width: 700}} rounded fluid/>
+                                    </Carousel.Item>
+                                    <Carousel.Item>
+                                        <Image src={rcp6} style={{width: 700}} rounded fluid/>
+                                    </Carousel.Item>
+                                    <Carousel.Item>
+                                        <Image src={rcp7} style={{width: 700}} rounded fluid/>
+                                    </Carousel.Item>
+                                    <Carousel.Item>
+                                        <Image src={rcp8} style={{width: 700}} rounded fluid/>
+                                    </Carousel.Item>
+                                    <Carousel.Item>
+                                        <Image src={rcp9} style={{width: 700}} rounded fluid/>
+                                    </Carousel.Item>
+                                    <Carousel.Item>
+                                        <Image src={rcp10} style={{width: 700}} rounded fluid/>
+                                    </Carousel.Item>
+                                    <Carousel.Item>
+                                        <Image src={rcp11} style={{width: 700}} rounded fluid/>
+                                    </Carousel.Item>
+                                </Carousel>
+                            </Col>
+                        </Row>
+                    </div>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="danger" onClick={handleSizeModalClose}>Close</Button>
+                </Modal.Footer>
+            </Modal>
 
             {/* MODAL REGISTER */}
             <Modal className="glassmorphism text-white" show={show} onHide={handleClose} data-bs-theme='dark' centered>
                 <Modal.Header className="modal-title">
-                    <Modal.Title>Register Order</Modal.Title>
+                    <Modal.Title>Add Order</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
@@ -386,46 +497,46 @@ function Order() {
                 </Modal.Header>
                 <Modal.Body>
                     <div className="container"><br />
-                        <Table striped bordered hover>
+                        <table>
                             <tbody>
                                 {Array.isArray(specificOrderData) && specificOrderData.map((defdata, index) => (
                                     <React.Fragment key={index}>
                                         <tr>
-                                            <td><strong>Order ID</strong></td>
+                                            <th>Order ID</th>
                                             <td>{defdata.order_id || 'N/A'}</td>
                                         </tr>
                                         <tr>
-                                            <td><strong>Customer Info</strong></td>
+                                            <th>Customer Info</th>
                                             <td><strong>ID: </strong>{defdata.customer_id || 'N/A'}, <strong>Name: </strong>{customerNames[customerIds.indexOf(defdata.customer_id)] || 'N/A'}</td>
                                         </tr>
                                         <tr>
-                                            <td><strong>Product Info</strong></td>
+                                            <th>Product Info</th>
                                             <td><strong>ID: </strong>{defdata.product_id || 'N/A'}, <strong>Product: </strong>{productNames[productIds.indexOf(defdata.product_id)] || 'N/A'}</td>
                                         </tr>
                                         <tr>
-                                            <td><strong>Quantity</strong></td>
+                                            <th>Quantity</th>
                                             <td>{defdata.orderQuantity || 'N/A'}</td>
                                         </tr>
                                         <tr>
-                                            <td><strong>Total Price</strong></td>
+                                            <th>Total Price</th>
                                             <td>{defdata.priceInTotal || 'N/A'}</td>
                                         </tr>
                                         <tr>
-                                            <td><strong>Status</strong></td>
+                                            <th>Status</th>
                                             <td>{defdata.orderStatus || 'N/A'}</td>
                                         </tr>
                                         <tr>
-                                            <td><strong>Processed By</strong></td>
+                                            <th>Processed By</th>
                                             <td><strong>ID: </strong>{defdata.user_id || 'N/A'}, <strong>Name: </strong>{userNames[userIds.indexOf(defdata.user_id)] || 'N/A'}</td>
                                         </tr>
                                         <tr>
-                                            <td><strong>Ordered When</strong></td>
+                                            <th>Ordered When</th>
                                             <td>{defdata.orderDatenTime}</td>
                                         </tr>
                                     </React.Fragment>
                                 ))}
                             </tbody>
-                        </Table>
+                        </table>
                     </div>
                 </Modal.Body>
                 <Modal.Footer>
@@ -506,7 +617,7 @@ function Order() {
                     <Button variant="danger" onClick={handleCloseUpdate}>Close</Button>
                 </Modal.Footer>
             </Modal>
-        </>
+        </Container>
     );
 }
 

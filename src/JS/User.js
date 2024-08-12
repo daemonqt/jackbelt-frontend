@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from "react";
 import axios from 'axios';
+import Container from 'react-bootstrap/Container';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
-import Table from 'react-bootstrap/Table';
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import InputGroup from 'react-bootstrap/InputGroup';
-import Navigationbar from "./Navbar";
 import Swal from 'sweetalert2';
 import "../CSS/Style.css";
 import BACKEND_URL from './backendURL';
+import Sidebar from "./Sidebar";
 
 function User() {
     const [users, setUsers] = useState([]);
@@ -203,60 +203,69 @@ function User() {
     }, [users, searchInput]);
 
     return (
-        <>
-            <Navigationbar/>
-            {/* USER UI */}
-            <div className="container"><br />
-                <div style={{ textAlign: 'center', alignSelf: 'center', justifyContent: "center", color: "white" }}>
-                    <h2 className="title">USERS</h2>
-                </div>
-                <div className="top-components">
-                    <InputGroup size="sm" className="mb-2 searchbar">
-                        <InputGroup.Text>Search</InputGroup.Text>
-                        <Form.Control size="sm" type="search" placeholder="search table data" value={searchInput} onChange={handleSearchInputChange} className="me-2" aria-label="Search" />
-                    </InputGroup>
-                    <Button variant="btn btn-success btn-sm" onClick={handleShow}>+ Register User</Button>
-                </div>
-                <Table className="mt-2 custom-table" striped bordered hover variant="dark" responsive>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Username</th>
-                            <th>Created/Updated When</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {searchResults.length > 0 &&
-                            searchResults.map((row, key) => (
-                                <tr key={key}>
-                                    <td>{row.user_id || 'N/A'}</td>
-                                    <td>{row.name || 'N/A'}</td>
-                                    <td>{row.username || 'N/A'}</td>
-                                    <td>{row.ucreation_date || 'N/A'}</td>
-                                    <td>
-                                        <Button variant='btn btn-primary btn-sm me-2' onClick={() => readSpecificUser(row.user_id)}>
-                                            View
-                                        </Button>
-                                        <Button variant='btn btn-warning btn-sm me-2' onClick={() => handleShowUpdate(row)}>
-                                            Update
-                                        </Button>
-                                        <Button variant='btn btn-danger btn-sm me-2' onClick={() => deleteUser(row.user_id)}>
-                                            Delete
-                                        </Button>
-                                    </td>
-                                </tr>
-                            ))
-                        }
-                    </tbody>
-                </Table>
-            </div>
+        <Container fluid>
+            <Row>
+                <Col sm={2}>
+                    <Sidebar/>
+                </Col>
+                <Col>
+                    {/* USER UI */}
+                    <div className="container"><br />
+                        <div className="top-components">
+                            <div className="searchbar-container">
+                                <InputGroup size="sm" className="searchbar">
+                                    <InputGroup.Text>Search</InputGroup.Text>
+                                    <Form.Control size="sm" type="search" placeholder="search table data" value={searchInput} onChange={handleSearchInputChange} className="input-data" aria-label="Search" />
+                                </InputGroup>
+                            </div>
+                            <div className="button-container">
+                                <Button variant="btn btn-success btn-sm" onClick={handleShow}>+ Add User</Button>
+                            </div>
+                        </div>
+                        <div className="table-container">
+                            <table className="mt-2 text-center">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Username</th>
+                                        <th>Created/Updated When</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {searchResults.length > 0 &&
+                                        searchResults.map((row, key) => (
+                                            <tr key={key}>
+                                                <td>{row.user_id || 'N/A'}</td>
+                                                <td>{row.name || 'N/A'}</td>
+                                                <td>{row.username || 'N/A'}</td>
+                                                <td>{row.ucreation_date || 'N/A'}</td>
+                                                <td>
+                                                    <Button variant='btn btn-primary btn-sm me-2' onClick={() => readSpecificUser(row.user_id)}>
+                                                        View
+                                                    </Button>
+                                                    <Button variant='btn btn-warning btn-sm me-2' onClick={() => handleShowUpdate(row)}>
+                                                        Update
+                                                    </Button>
+                                                    <Button variant='btn btn-danger btn-sm me-2' onClick={() => deleteUser(row.user_id)}>
+                                                        Delete
+                                                    </Button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </Col>
+            </Row>
 
             {/* MODAL REGISTER */}
             <Modal className="glassmorphism text-white" show={show} onHide={handleClose} data-bs-theme='dark' centered>
                 <Modal.Header className="modal-title">
-                    <Modal.Title>Register User</Modal.Title>
+                    <Modal.Title>Add User</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
@@ -299,30 +308,30 @@ function User() {
                 </Modal.Header>
                 <Modal.Body>
                     <div className="container"><br />
-                        <Table striped bordered hover>
+                        <table>
                             <tbody>
                                 {Array.isArray(specificUserData) && specificUserData.map((defdata, index) => (
                                     <React.Fragment key={index}>
                                         <tr>
-                                            <td><strong>User ID</strong></td>
+                                            <th>User ID</th>
                                             <td>{defdata.user_id || 'N/A'}</td>
                                         </tr>
                                         <tr>
-                                            <td><strong>Name</strong></td>
+                                            <th>Name</th>
                                             <td>{defdata.name || 'N/A'}</td>
                                         </tr>
                                         <tr>
-                                            <td><strong>Username</strong></td>
+                                            <th>Username</th>
                                             <td>{defdata.username || 'N/A'}</td>
                                         </tr>
                                         <tr>
-                                            <td><strong>Created/Updated When</strong></td>
+                                            <th>Created/Updated When</th>
                                             <td>{defdata.ucreation_date}</td>
                                         </tr>
                                     </React.Fragment>
                                 ))}
                             </tbody>
-                        </Table>
+                        </table>
                     </div>
                 </Modal.Body>
                 <Modal.Footer>
@@ -368,7 +377,7 @@ function User() {
                     <Button variant="danger" onClick={handleCloseUpdate}>Close</Button>
                 </Modal.Footer>
             </Modal>
-        </>
+        </Container>
     );
 }
 

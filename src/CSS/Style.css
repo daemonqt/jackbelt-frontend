@@ -1,10 +1,5 @@
-.title { 
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50%   { transform: scale(1.2); }
+body {
+  background-color: #0f4c75;
 }
 
 .modal-title {
@@ -21,26 +16,68 @@
 }
 
 .top-components {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    align-content: center;
-    overflow: auto;
-    flex-direction: row;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.searchbar {
-    background-color: black;
-    width: 20%;
+.searchbar-container {
+  width: 300px; /* Adjust the width as needed */
 }
 
-.custom-table td tr {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    align-content: center;
-    justify-content: space-evenly;
-    overflow: auto;
-    flex-direction: row;
+.button-container {
+  display: flex;
+}
+
+.table-container {
+  display: flex;
+  overflow-x: auto; /* Enable horizontal scrolling if the table is wider than the container */
+  overflow-y: auto;
+}
+
+.container {
+  display: grid;
+}
+
+table {
+  width: 100%; /* Make the table take up 100% of the available width */
+  border-collapse: collapse; /* Ensure consistent borders between cells */
+}
+
+th, td {
+  padding: 5px;
+}
+
+th {
+  background-color: #1B262C;
+  color: #BBE1FA;
+}
+
+td {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #BBE1FA;
+}
+
+td:hover {
+  color: #1B262C;
+}
+
+tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+tbody td {
+  position: relative;
+  font-weight: bold;
+}
+
+tbody td:hover:before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 1px;
+  bottom: 1px;
+  background-color: rgba(255, 255, 255, 0.2);
+  z-index: -1;
 }

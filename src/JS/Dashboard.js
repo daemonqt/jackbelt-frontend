@@ -1,301 +1,423 @@
 import React, { useEffect, useState } from "react";
 import axios from 'axios';
-import Image from 'react-bootstrap/Image';
-import Navigationbar from "./Navbar";
-import Chart from 'chart.js/auto';
 import { Bar, Pie } from 'react-chartjs-2';
-import Card from 'react-bootstrap/Card';
+import Container from 'react-bootstrap/Container';
+import { Card, CardBody, CardImg, CardText, CardTitle, Col, Row } from "react-bootstrap";
+import Image from 'react-bootstrap/Image';
+import Chart from 'chart.js/auto';
+import Sidebar from "./Sidebar";
 import "bootstrap/dist/css/bootstrap.css";
 import "../CSS/Dash.css";
 import icon1 from "../Pics/user.png";
-import icon2 from "../Pics/shopping-cart.png";
+import icon2 from "../Pics/inventory-alt.png";
 import icon3 from "../Pics/users-alt.png";
 import icon4 from "../Pics/handshake.png";
 import icon5 from "../Pics/coins.png";
 import icon6 from "../Pics/money-check-edit.png";
+import icon7 from "../Pics/box-open.png";
+import icon8 from "../Pics/line-chart.png";
+
 import BACKEND_URL from './backendURL';
-import { CardBody, CardImg, CardText, Col, Row } from "react-bootstrap";
 
 const Dashboard = () => {
-    const [totalUsers, setTotalUsers] = useState(0);
-    const [totalProducts, setTotalProducts] = useState(0);
-    const [totalCustomers, setTotalCustomers] = useState(0);
-    const [totalSuppliers, setTotalSuppliers] = useState(0);
-    const [totalOrders, setTotalOrders] = useState(0);
-    const [totalPurchases, setTotalPurchases] = useState(0);
-    const [totalSales, setTotalSales] = useState(0);
-    const [salesByProducts, setSalesByProducts] = useState([]);
+    const [dashboardData, setDashboardData] = useState({
+        totalUsers: 0,
+        totalProducts: 0,
+        totalCustomers: 0,
+        totalSuppliers: 0,
+        totalOrders: 0,
+        totalPurchases: 0,
+        totalFreshproducts: 0,
+        totalSales: 0,
+        salesByProducts: [],
+        salesByMonth: [],
+        ordersByMonth: [],
+    });
 
-    const dash = JSON.parse(localStorage.getItem('token'));
-    const token = dash.data.token;
+    const { totalUsers, totalProducts, totalCustomers, totalSuppliers, totalOrders, totalPurchases, totalFreshproducts, totalSales, salesByProducts, salesByMonth, ordersByMonth } = dashboardData;
 
-    useEffect(() => {
-        const fetchTotalUsers = async () => {
-            try {
-                const response = await axios.get(`${BACKEND_URL}/api/users/count`, {
-                    headers: {
-                        Authorization: token
-                    }
-                });
-                setTotalUsers(response.data.userCount);
-            } catch (error) {
-                console.error('Error fetching total number of users:', error);
-            }
-        };
-        const fetchTotalProducts = async () => {
-            try {
-                const response = await axios.get(`${BACKEND_URL}/api/products/count`, {
-                    headers: {
-                        Authorization: token
-                    }
-                });
-                setTotalProducts(response.data.productCount);
-            } catch (error) {
-                console.error('Error fetching total number of products:', error);
-            }
-        };
-        const fetchTotalCustomers = async () => {
-            try {
-                const response = await axios.get(`${BACKEND_URL}/api/customers/count`, {
-                    headers: {
-                        Authorization: token
-                    }
-                });
-                setTotalCustomers(response.data.customerCount);
-            } catch (error) {
-                console.error('Error fetching total number of customers:', error);
-            }
-        };
-        const fetchTotalSuppliers = async () => {
-            try {
-                const response = await axios.get(`${BACKEND_URL}/api/suppliers/count`, {
-                    headers: {
-                        Authorization: token
-                    }
-                });
-                setTotalSuppliers(response.data.supplierCount);
-            } catch (error) {
-                console.error('Error fetching total number of suppliers:', error);
-            }
-        };
-        const fetchTotalOrders = async () => {
-            try {
-                const response = await axios.get(`${BACKEND_URL}/api/orders/count`, {
-                    headers: {
-                        Authorization: token
-                    }
-                });
-                setTotalOrders(response.data.orderCount);
-            } catch (error) {
-                console.error('Error fetching total number of orders:', error);
-            }
-        };
-        const fetchTotalPurchases = async () => {
-            try {
-                const response = await axios.get(`${BACKEND_URL}/api/purchaseorders/count`, {
-                    headers: {
-                        Authorization: token
-                    }
-                });
-                setTotalPurchases(response.data.purchaseorderCount);
-            } catch (error) {
-                console.error('Error fetching total number of purchases:', error);
-            }
-        };
-
-        fetchTotalUsers();
-        fetchTotalProducts();
-        fetchTotalCustomers();
-        fetchTotalSuppliers();
-        fetchTotalOrders();
-        fetchTotalPurchases();
-
-    }, [token]);
+    const token = JSON.parse(localStorage.getItem('token'))?.data?.token;
 
     useEffect(() => {
-        const fetchTotalSales = async () => {
+        const fetchData = async () => {
             try {
-                const response = await axios.get(`${BACKEND_URL}/api/sales`, {
-                    headers: {
-                        Authorization: token
-                    }
+                const promises = [
+                    axios.get(`${BACKEND_URL}/api/users/count`, { headers: { Authorization: token } }),
+                    axios.get(`${BACKEND_URL}/api/products/count`, { headers: { Authorization: token } }),
+                    axios.get(`${BACKEND_URL}/api/customers/count`, { headers: { Authorization: token } }),
+                    axios.get(`${BACKEND_URL}/api/suppliers/count`, { headers: { Authorization: token } }),
+                    axios.get(`${BACKEND_URL}/api/orders/count`, { headers: { Authorization: token } }),
+                    axios.get(`${BACKEND_URL}/api/purchaseorders/count`, { headers: { Authorization: token } }),
+                    axios.get(`${BACKEND_URL}/api/fresh-product/count`, { headers: { Authorization: token } }),
+                    axios.get(`${BACKEND_URL}/api/sales`, { headers: { Authorization: token } }),
+                    axios.get(`${BACKEND_URL}/api/sales-by-products`, { headers: { Authorization: token } }),
+                    axios.get(`${BACKEND_URL}/api/sales-by-month`, { headers: { Authorization: token } }),
+                    axios.get(`${BACKEND_URL}/api/orders-by-month`, { headers: { Authorization: token } })
+                ];
+
+                const responses = await Promise.all(promises);
+                const data = responses.map(response => response.data);
+                setDashboardData({
+                    totalUsers: data[0].userCount,
+                    totalProducts: data[1].productCount,
+                    totalCustomers: data[2].customerCount,
+                    totalSuppliers: data[3].supplierCount,
+                    totalOrders: data[4].orderCount,
+                    totalPurchases: data[5].purchaseorderCount,
+                    totalFreshproducts: data[6].freshproductsCount,
+                    totalSales: data[7].totalSales,
+                    salesByProducts: data[8],
+                    salesByMonth: data[9],
+                    ordersByMonth: data[10]
                 });
-                setTotalSales(response.data.totalSales);
             } catch (error) {
-                console.error('Error fetching total sales:', error);
-            }
-        };
-        const fetchSalesByProducts = async () => {
-            try {
-                const response = await axios.get(`${BACKEND_URL}/api/sales-by-products`, {
-                    headers: {
-                        Authorization: token
-                    }
-                });
-                setSalesByProducts(response.data);
-            } catch (error) {
-                console.error('Error fetching sales by products:', error);
+                console.error('Error fetching data:', error);
             }
         };
 
-        fetchTotalSales();
-        fetchSalesByProducts();
-    }, [token]);
-
-    const generateRandomColors = (numColors) => {
-        const colors = [];
-        for (let i = 0; i < numColors; i++) {
-            const randomColor = `rgba(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, 0.7)`;
-            colors.push(randomColor);
+        if (token) {
+            fetchData();
         }
-        return colors;
+    }, [token]);
+
+    const processOrdersByMonthData = () => {
+        const products = [];
+        const orderMonths = [];
+        const productData = {};
+
+        ordersByMonth.forEach(item => {
+            if (!products.includes(item.productName)) {
+                products.push(item.productName);
+            }
+            if (!orderMonths.includes(item.orderMonth)) {
+                orderMonths.push(item.orderMonth);
+            }
+            if (!productData[item.productName]) {
+                productData[item.productName] = [];
+            }
+            productData[item.productName][orderMonths.indexOf(item.orderMonth)] = item.orderCount;
+        });
+
+        const datasets = orderMonths.map((month, index) => {
+            return {
+                label: month,
+                data: products.map(product => productData[product][index] || 0),
+                backgroundColor: `rgba(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, 0.7)`,
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1,
+            };
+        });
+
+        return { products, datasets };
     };
 
+    const { products, datasets } = processOrdersByMonthData();
+
     return (
-        <>  
-            <Navigationbar/>
-            <div className="container"><br />
-                <div style={{ textAlign: 'center', alignSelf: 'center', justifyContent: "center", color: "white" }}>
-                    <h2 className="title">DASHBOARD</h2>
-                </div>
-                <div className="mt-4">
-                    <Row>
-                        <Col>
-                            <Card bg="primary">
-                                <CardBody>
-                                    <CardImg className="photo" src={icon1}/>
-                                    <CardText>Users: <span>{totalUsers}</span></CardText>
-                                </CardBody>
-                            </Card>
-                        </Col>
-                        <Col>
-                            <Card bg="success">
-                                <CardBody>
-                                    <CardImg className="photo" src={icon2}/>
-                                    <CardText>Products: <span>{totalProducts}</span></CardText>
-                                </CardBody>
-                            </Card>
-                        </Col>
-                        <Col>
-                            <Card bg="danger">
-                                <CardBody>
-                                    <CardImg className="photo" src={icon3}/>
-                                    <CardText>Customers: <span>{totalCustomers}</span></CardText>
-                                </CardBody>
-                            </Card>
-                        </Col>
-                        <Col>
-                            <Card bg="warning">
-                                <CardBody>
-                                    <CardImg className="photo" src={icon4}/>
-                                    <CardText>Suppliers: <span>{totalSuppliers}</span></CardText>
-                                </CardBody>
-                            </Card>
-                        </Col>
-                        <Col>
-                            <Card bg="info">
-                                <CardBody>
-                                    <CardImg className="photo" src={icon5}/>
-                                    <CardText>Orders: <span>{totalOrders}</span></CardText>
-                                </CardBody>
-                            </Card>
-                        </Col>
-                        <Col>
-                            <Card bg="light">
-                                <CardBody>
-                                    <CardImg className="photo" src={icon6}/>
-                                    <CardText>Purchase: <span>{totalPurchases}</span></CardText>
-                                </CardBody>
-                            </Card>
-                        </Col>
-                    </Row>
-                </div>
-                <div className="mt-4">
-                    <Row>
-                        <Col>
-                            <Card bg="dark">
-                                <CardBody>
-                                    <Bar
-                                        data={{
-                                            labels: ['Total Sales'],
-                                            datasets: [{
-                                                label: 'Total Sales',
-                                                data: [totalSales],
-                                                backgroundColor: 'rgba(54, 162, 235, 0.7)',
-                                                borderColor: 'rgba(54, 162, 235, 1)',
-                                                borderWidth: 1
-                                            }]
-                                        }}
-                                        options={{
-                                            scales: {
-                                                y: {
-                                                    beginAtZero: true,
-                                                    grid: {
-                                                        color: 'rgba(255,255,255,0.3)' // White grid lines
+        <Container fluid>
+            <Row>
+                <Col sm={2}>
+                    <Sidebar />
+                </Col>
+                <Col>
+                    <div className="dash-container">
+                        <div className="mt-2">
+                        <Row xs={1} md={4} className="g-3">
+                                <Col>
+                                    <Card>
+                                        <Card.Img className="photo" variant="top" src={icon1} />
+                                        <Card.Body>
+                                            <Card.Title className="text-center">USERS</Card.Title>
+                                            <Card.Text className="text-center">
+                                                {totalUsers}
+                                            </Card.Text>
+                                        </Card.Body>
+                                    </Card>
+                                </Col>
+                                <Col>
+                                    <Card>
+                                        <Card.Img className="photo" variant="top" src={icon2} />
+                                        <Card.Body>
+                                            <Card.Title className="text-center">PRODUCTS</Card.Title>
+                                            <Card.Text className="text-center">
+                                                {totalProducts}
+                                            </Card.Text>
+                                        </Card.Body>
+                                    </Card>
+                                </Col>
+                                <Col>
+                                    <Card>
+                                        <Card.Img className="photo" variant="top" src={icon3} />
+                                        <Card.Body>
+                                            <Card.Title className="text-center">CUSTOMERS</Card.Title>
+                                            <Card.Text className="text-center">
+                                                {totalCustomers}
+                                            </Card.Text>
+                                        </Card.Body>
+                                    </Card>
+                                </Col>
+                                <Col>
+                                    <Card>
+                                        <Card.Img className="photo" variant="top" src={icon4} />
+                                        <Card.Body>
+                                            <Card.Title className="text-center">SUPPLIERS</Card.Title>
+                                            <Card.Text className="text-center">
+                                                {totalSuppliers}
+                                            </Card.Text>
+                                        </Card.Body>
+                                    </Card>
+                                </Col>
+                                <Col>
+                                    <Card>
+                                        <Card.Img className="photo" variant="top" src={icon5} />
+                                        <Card.Body>
+                                            <Card.Title className="text-center">ORDERS</Card.Title>
+                                            <Card.Text className="text-center">
+                                                {totalOrders}
+                                            </Card.Text>
+                                        </Card.Body>
+                                    </Card>
+                                </Col>
+                                <Col>
+                                    <Card>
+                                        <Card.Img className="photo" variant="top" src={icon6} />
+                                        <Card.Body>
+                                            <Card.Title className="text-center">PURCHASES</Card.Title>
+                                            <Card.Text className="text-center">
+                                                {totalPurchases}
+                                            </Card.Text>
+                                        </Card.Body>
+                                    </Card>
+                                </Col>
+                                <Col>
+                                    <Card>
+                                        <Card.Img className="photo" variant="top" src={icon7} />
+                                        <Card.Body>
+                                            <Card.Title className="text-center">FRESH PRODUCTS</Card.Title>
+                                            <Card.Text className="text-center">
+                                                {totalFreshproducts}
+                                            </Card.Text>
+                                        </Card.Body>
+                                    </Card>
+                                </Col>
+                                <Col>
+                                    <Card>
+                                        <Card.Img className="photo" variant="top" src={icon8} />
+                                        <Card.Body>
+                                            <Card.Title className="text-center">TOTAL SALES</Card.Title>
+                                            <Card.Text className="text-center">
+                                                ₱{totalSales}
+                                            </Card.Text>
+                                        </Card.Body>
+                                    </Card>
+                                </Col>
+                            </Row>
+                        </div>
+
+                        <div className="mt-3">
+                                <Col>
+                                    <Card>
+                                        <CardBody>
+                                            <Bar
+                                                data={{
+                                                    labels: salesByProducts.map(product => product.productName),
+                                                    datasets: [{
+                                                        data: salesByProducts.map(product => product.total_sales),
+                                                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                                                        borderColor: 'rgba(54, 162, 235, 1)',
+                                                        borderWidth: 1,
+                                                        label: 'Sold Amount' // Label for the dataset
+                                                    }]
+                                                }}
+                                                height="550px"
+                                                width="800px"
+                                                options={{
+                                                    responsive: true,
+                                                    maintainAspectRatio: false,
+                                                    indexAxis: 'y', // Set the index axis to 'y' for horizontal bar chart
+                                                    plugins: {
+                                                        legend: {
+                                                            display: false,
+                                                            position: 'bottom',
+                                                            labels: {
+                                                                color: '#BBE1FA'
+                                                            }
+                                                        },
+                                                        title: {
+                                                            display: true,
+                                                            text: 'Product Sales',
+                                                            font: {
+                                                                size: 18
+                                                            },
+                                                            color: '#BBE1FA'
+                                                        }
                                                     },
-                                                    ticks: {
-                                                        color: 'rgba(255,255,255,1)' // White tick marks
+                                                    scales: {
+                                                        y: {
+                                                            beginAtZero: true,
+                                                            grid: {
+                                                                color: '#BBE1FA' // White grid lines
+                                                            },
+                                                            ticks: {
+                                                                color: '#BBE1FA' // White tick marks
+                                                            }
+                                                        },
+                                                        x: {
+                                                            title: {
+                                                                display: true,
+                                                                text: 'Sold Amount',
+                                                                color: '#BBE1FA'
+                                                            },
+                                                            grid: {
+                                                                color: '#BBE1FA' // White grid lines
+                                                            },
+                                                            ticks: {
+                                                                color: '#BBE1FA' // White tick marks
+                                                            }
+                                                        }
+                                                    },
+                                                }}
+                                            />
+                                        </CardBody>
+                                    </Card>
+                                </Col>
+                        </div>
+
+                        <div className="mt-3">
+                                <Col>
+                                    <Card>
+                                        <CardBody>
+                                            <Bar
+                                                data={{
+                                                    labels: salesByMonth.map(order => order.month),
+                                                    datasets: [{
+                                                        data: salesByMonth.map(order => order.sales_amount),
+                                                        backgroundColor: 'rgba(54, 162, 235, 0.7)', // Bar color
+                                                        borderColor: 'rgba(54, 162, 235, 1)', // Bar border color
+                                                        borderWidth: 1,
+                                                        label: 'Sold Amount' // Label for the dataset
+                                                    }]
+                                                }}
+                                                height="550px"
+                                                width="800px"
+                                                options={{
+                                                    responsive: true,
+                                                    maintainAspectRatio: false,
+                                                    indexAxis: 'x', // Set the index axis to 'y' for horizontal bar chart
+                                                    plugins: {
+                                                        legend: {
+                                                            display: false,
+                                                            position: 'bottom',
+                                                            labels: {
+                                                                color: '#BBE1FA'
+                                                            }
+                                                        },
+                                                        title: {
+                                                            display: true,
+                                                            text: 'Monthly Sales',
+                                                            font: {
+                                                                size: 18
+                                                            },
+                                                            color: '#BBE1FA'
+                                                        }
+                                                    },
+                                                    scales: {
+                                                        y: {
+                                                            beginAtZero: true,
+                                                            title: {
+                                                                display: true,
+                                                                text: 'Sold Amount',
+                                                                color: '#BBE1FA'
+                                                            },
+                                                            grid: {
+                                                                color: '#BBE1FA' // White grid lines
+                                                            },
+                                                            ticks: {
+                                                                color: '#BBE1FA' // White tick marks
+                                                            }
+                                                        },
+                                                        x: {
+                                                            grid: {
+                                                                color: '#BBE1FA' // White grid lines
+                                                            },
+                                                            ticks: {
+                                                                color: '#BBE1FA' // White tick marks
+                                                            }
+                                                        }
+                                                    },
+                                                }}
+                                            />
+                                        </CardBody>
+                                    </Card>
+                                </Col>
+                        </div>
+                       
+                        <div className="mt-3">
+                            <Col>
+                                <Card>
+                                    <Card.Body>
+                                        <Bar
+                                            data={{
+                                                labels: products,
+                                                datasets: datasets
+                                            }}
+                                            height="1000px"
+                                            width="800px"
+                                            options={{
+                                                responsive: true,
+                                                maintainAspectRatio: false,
+                                                indexAxis: 'y',
+                                                plugins: {
+                                                    legend: {
+                                                        display: true,
+                                                        position: 'bottom',
+                                                        labels: {
+                                                            color: '#BBE1FA'
+                                                        }
+                                                    },
+                                                    title: {
+                                                        display: true,
+                                                        text: 'Product Seasonality',
+                                                        font: {
+                                                            size: 18
+                                                        },
+                                                        color: '#BBE1FA'
                                                     }
                                                 },
-                                                x: {
-                                                    grid: {
-                                                        color: 'rgba(255,255,255,0.3)' // White grid lines
+                                                scales: {
+                                                    y: {
+                                                        beginAtZero: true,
+                                                        grid: {
+                                                            color: '#BBE1FA' // White grid lines
+                                                        },
+                                                        ticks: {
+                                                            color: '#BBE1FA' // White tick marks
+                                                        }
                                                     },
-                                                    ticks: {
-                                                        color: 'rgba(255,255,255,1)' // White tick marks
-                                                    }
-                                                }
-                                            },
-                                            plugins: {
-                                                legend: {
-                                                    labels: {
-                                                        color: 'white' // White legend text color
-                                                    }
-                                                }
-                                            }
-                                        }}
-                                    />
-                                </CardBody>
-                            </Card>
-                        </Col>
-                        <Col>
-                            <Card bg="secondary">
-                                <CardBody>
-                                    <Pie
-                                        data={{
-                                            labels: salesByProducts.map(product => product.productName),
-                                            datasets: [{
-                                                data: salesByProducts.map(product => product.total_sales),
-                                                backgroundColor: generateRandomColors(salesByProducts.length) // Use random colors
-                                            }]
-                                        }}
-                                        options={{
-                                            plugins: {
-                                                legend: {
-                                                    display: true,
-                                                    position: 'bottom',
-                                                    labels: {
-                                                        color: 'white'
+                                                    x: {
+                                                        title: {
+                                                            display: true,
+                                                            text: 'Order Count',
+                                                            color: '#BBE1FA'
+                                                        },
+                                                        grid: {
+                                                            color: '#BBE1FA' // White grid lines
+                                                        },
+                                                        ticks: {
+                                                            color: '#BBE1FA' // White tick marks
+                                                        }
                                                     }
                                                 },
-                                                title: {
-                                                    display: true,
-                                                    text: 'Sales by Product',
-                                                    font: {
-                                                        size: 18
-                                                    },
-                                                    color: 'white'
-                                                }
-                                            }
-                                        }}
-                                    />
-                                </CardBody>
-                            </Card>
-                        </Col>
-                    </Row>
-                </div>
-            </div>
-        </>
+                                            }}
+                                        />
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        </div>
+                    </div>
+                </Col>
+            </Row>
+        </Container>
     );
 };
 

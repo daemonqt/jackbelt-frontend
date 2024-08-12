@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from "react";
 import axios from 'axios';
+import Container from 'react-bootstrap/Container';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
-import Table from 'react-bootstrap/Table';
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import InputGroup from 'react-bootstrap/InputGroup';
-import Navigationbar from "./Navbar";
 import Swal from 'sweetalert2';
 import "../CSS/Style.css";
 import BACKEND_URL from './backendURL';
+import Sidebar from "./Sidebar.js";
 
 function Purchase() {
     const [purchases, setPurchases] = useState([]);
@@ -230,18 +230,41 @@ function Purchase() {
     const handleSearchInputChange = (event) => {
         setSearchInput(event.target.value);
     };
+    
+    const supplierIdToNameMap = supplierIds.reduce((map, id, index) => {
+        map[id] = supplierNames[index];
+        return map;
+    }, {});
+
+    const productIdToNameMap = productIds.reduce((map, id, index) => {
+        map[id] = productNames[index];
+        return map;
+    }, {});
+
+    const userIdToNameMap = userIds.reduce((map, id, index) => {
+        map[id] = userNames[index];
+        return map;
+    }, {});
 
     const filterPurchases = () => {
-        return purchases.filter((purchase) =>
-            purchase.purchaseorder_id.toString().includes(searchInput.toLowerCase()) ||
-            purchase.supplier_id.toString().includes(searchInput.toLowerCase()) ||
-            purchase.product_id.toString().includes(searchInput.toLowerCase()) ||
-            purchase.purchaseQuantity.toString().includes(searchInput.toLowerCase()) ||
-            purchase.receivedMoney.toString().includes(searchInput.toLowerCase()) ||
-            purchase.purchaseStatus.toLowerCase().includes(searchInput.toLowerCase()) ||
-            purchase.user_id.toString().includes(searchInput.toLowerCase()) ||
-            purchase.soldDatenTime.toString().toLowerCase().includes(searchInput.toLowerCase())
-        );
+        return purchases.filter((purchase) => {
+            const supplierName = supplierIdToNameMap[purchase.supplier_id] || '';
+            const productName = productIdToNameMap[purchase.product_id] || '';
+            const userName = userIdToNameMap[purchase.user_id] || '';
+            return (
+                purchase.purchaseorder_id.toString().includes(searchInput.toLowerCase()) ||
+                purchase.supplier_id.toString().includes(searchInput.toLowerCase()) ||
+                supplierName.toLowerCase().includes(searchInput.toLowerCase()) ||
+                purchase.product_id.toString().includes(searchInput.toLowerCase()) ||
+                productName.toLowerCase().includes(searchInput.toLowerCase()) ||
+                purchase.purchaseQuantity.toString().includes(searchInput.toLowerCase()) ||
+                purchase.receivedMoney.toString().includes(searchInput.toLowerCase()) ||
+                purchase.purchaseStatus.toLowerCase().includes(searchInput.toLowerCase()) ||
+                purchase.user_id.toString().includes(searchInput.toLowerCase()) ||
+                userName.toLowerCase().includes(searchInput.toLowerCase()) ||
+                purchase.soldDatenTime.toString().toLowerCase().includes(searchInput.toLowerCase())
+            );
+        });
     };
 
     useEffect(() => {
@@ -249,68 +272,77 @@ function Purchase() {
     }, [purchases, searchInput]);
 
     return (
-        <>
-            <Navigationbar/>
-            {/* USER UI */}
-            <div className="container"><br />
-                <div style={{ textAlign: 'center', alignSelf: 'center', justifyContent: "center", color: "white" }}>
-                    <h2 className="title">ORDER TO SUPPLIER</h2>
-                </div>
-                <div className="top-components">
-                    <InputGroup size="sm" className="mb-2 searchbar">
-                        <InputGroup.Text>Search</InputGroup.Text>
-                        <Form.Control size="sm" type="search" placeholder="search table data" value={searchInput} onChange={handleSearchInputChange} className="me-2" aria-label="Search" />
-                    </InputGroup>
-                    <Button variant="btn btn-success btn-sm" onClick={handleShow}>+ Register Purchase</Button>
-                </div>
-                <Table className="mt-2 custom-table" striped bordered hover variant="dark" responsive>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Supplier's Name</th>
-                            <th>Product</th>
-                            <th>Quantity</th>
-                            <th>Received Money</th>
-                            <th>Status</th>
-                            <th>Processed by</th>
-                            <th>Purchased When</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {searchResults.length > 0 &&
-                            searchResults.map((row, key) => (
-                                <tr key={key}>
-                                    <td>{row.purchaseorder_id || 'N/A'}</td>
-                                    <td>{supplierNames[supplierIds.indexOf(row.supplier_id)] || 'N/A'}</td>
-                                    <td>{productNames[productIds.indexOf(row.product_id)] || 'N/A'}</td>
-                                    <td>{row.purchaseQuantity || 'N/A'}</td>
-                                    <td>{row.receivedMoney}</td>
-                                    <td>{row.purchaseStatus || 'N/A'}</td>
-                                    <td>{userNames[userIds.indexOf(row.user_id)] || 'N/A'}</td>
-                                    <td>{row.soldDatenTime || 'N/A'}</td>
-                                    <td>
-                                        <Button variant='btn btn-primary btn-sm me-2' onClick={() => readSpecificPurchase(row.purchaseorder_id)}>
-                                            View
-                                        </Button>
-                                        <Button variant='btn btn-warning btn-sm me-2' onClick={() => handleShowUpdate(row)}>
-                                            Update
-                                        </Button>
-                                        <Button variant='btn btn-danger btn-sm me-2' onClick={() => deletePurchase(row.purchaseorder_id)}>
-                                            Delete
-                                        </Button>
-                                    </td>
-                                </tr>
-                            ))
-                        }
-                    </tbody>
-                </Table>
-            </div>
+        <Container fluid>
+            <Row>
+                <Col sm={2}>
+                    <Sidebar/>
+                </Col>
+                <Col>
+                    {/* USER UI */}
+                    <div className="container"><br />
+                        <div className="top-components">
+                            <div className="searchbar-container">
+                                <InputGroup size="sm" className="searchbar">
+                                    <InputGroup.Text>Search</InputGroup.Text>
+                                    <Form.Control size="sm" type="search" placeholder="search table data" value={searchInput} onChange={handleSearchInputChange} className="input-data" aria-label="Search" />
+                                </InputGroup>
+                            </div>
+                            <div className="button-container">
+                                <Button variant="btn btn-success btn-sm" onClick={handleShow}>+ Add Purchase</Button>
+                            </div>
+                        </div>
+                        <div className="table-container">
+                            <table className="mt-2 text-center">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Supplier's Name</th>
+                                        <th>Product</th>
+                                        <th>Quantity</th>
+                                        <th>Received Money</th>
+                                        <th>Status</th>
+                                        <th>Processed by</th>
+                                        <th>Purchased When</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {searchResults.length > 0 &&
+                                        searchResults.map((row, key) => (
+                                            <tr key={key}>
+                                                <td>{row.purchaseorder_id || 'N/A'}</td>
+                                                <td>{supplierNames[supplierIds.indexOf(row.supplier_id)] || 'N/A'}</td>
+                                                <td>{productNames[productIds.indexOf(row.product_id)] || 'N/A'}</td>
+                                                <td>{row.purchaseQuantity || 'N/A'}</td>
+                                                <td>{row.receivedMoney}</td>
+                                                <td>{row.purchaseStatus || 'N/A'}</td>
+                                                <td>{userNames[userIds.indexOf(row.user_id)] || 'N/A'}</td>
+                                                <td>{row.soldDatenTime || 'N/A'}</td>
+                                                <td>
+                                                    <Button variant='btn btn-primary btn-sm me-2' onClick={() => readSpecificPurchase(row.purchaseorder_id)}>
+                                                        View
+                                                    </Button>
+                                                    <Button variant='btn btn-warning btn-sm me-2' onClick={() => handleShowUpdate(row)}>
+                                                        Update
+                                                    </Button>
+                                                    <Button variant='btn btn-danger btn-sm me-2' onClick={() => deletePurchase(row.purchaseorder_id)}>
+                                                        Delete
+                                                    </Button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </Col>
+            </Row>
 
             {/* MODAL REGISTER */}
             <Modal className="glassmorphism text-white" show={show} onHide={handleClose} data-bs-theme='dark' centered>
                 <Modal.Header className="modal-title">
-                    <Modal.Title>Register Purchase</Modal.Title>
+                    <Modal.Title>Add Purchase</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
@@ -396,46 +428,46 @@ function Purchase() {
                 </Modal.Header>
                 <Modal.Body>
                     <div className="container"><br />
-                        <Table striped bordered hover>
+                        <table>
                             <tbody>
                                 {Array.isArray(specificPurchaseData) && specificPurchaseData.map((defdata, index) => (
                                     <React.Fragment key={index}>
                                         <tr>
-                                            <td><strong>Purchase ID</strong></td>
+                                            <th>Purchase ID</th>
                                             <td>{defdata.purchaseorder_id || 'N/A'}</td>
                                         </tr>
                                         <tr>
-                                            <td><strong>Supplier Info</strong></td>
+                                            <th>Supplier Info</th>
                                             <td><strong>ID: </strong>{defdata.supplier_id || 'N/A'}, <strong>Name: </strong>{supplierNames[supplierIds.indexOf(defdata.supplier_id)] || 'N/A'}</td>
                                         </tr>
                                         <tr>
-                                            <td><strong>Product Info</strong></td>
+                                            <th>Product Info</th>
                                             <td><strong>ID: </strong>{defdata.product_id || 'N/A'}, <strong>Product: </strong>{productNames[productIds.indexOf(defdata.product_id)] || 'N/A'}</td>
                                         </tr>
                                         <tr>
-                                            <td><strong>Quantity</strong></td>
+                                            <th>Quantity</th>
                                             <td>{defdata.purchaseQuantity || 'N/A'}</td>
                                         </tr>
                                         <tr>
-                                            <td><strong>Received Money</strong></td>
+                                            <th>Received Money</th>
                                             <td>{defdata.receivedMoney || 'N/A'}</td>
                                         </tr>
                                         <tr>
-                                            <td><strong>Status</strong></td>
+                                            <th>Status</th>
                                             <td>{defdata.purchaseStatus || 'N/A'}</td>
                                         </tr>
                                         <tr>
-                                            <td><strong>Processed By</strong></td>
+                                            <th>Processed By</th>
                                             <td><strong>ID: </strong>{defdata.user_id || 'N/A'}, <strong>Name: </strong>{userNames[userIds.indexOf(defdata.user_id)] || 'N/A'}</td>
                                         </tr>
                                         <tr>
-                                            <td><strong>Purchaseed When</strong></td>
+                                            <th>Purchased When</th>
                                             <td>{defdata.soldDatenTime || 'N/A'}</td>
                                         </tr>
                                     </React.Fragment>
                                 ))}
                             </tbody>
-                        </Table>
+                        </table>
                     </div>
                 </Modal.Body>
                 <Modal.Footer>
@@ -524,7 +556,7 @@ function Purchase() {
                     <Button variant="danger" onClick={handleCloseUpdate}>Close</Button>
                 </Modal.Footer>
             </Modal>
-        </>
+        </Container>
     );
 }
 
